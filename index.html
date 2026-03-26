@@ -153,27 +153,46 @@
 </div>
 
 <script>
-  // ===== Account Database (อัปเดต username ใหม่) =====
-  const accounts = {
-    'thanapun.k': {
-      password: 'oat44567',
-      displayName: 'คุณธนะพันธุ์ การคนซื่อ',
-      role: 'head',
-      roleLabel: 'หัวหน้าหน่วยสื่อสารองค์กร'
-    },
-    'apinanun.s': {
-      password: 'lib44567',
-      displayName: 'คุณอาภินานันท์ ศรีมา',
-      role: 'admin',
-      roleLabel: 'นักประชาสัมพันธ์'
-    },
-    'thian': {
-      password: 'lib498800',
-      displayName: 'คุณเธียรวิชญ์ พิชญนันท์กุล',
-      role: 'admin',
-      roleLabel: 'ผู้ดูแลระบบ'
-    }
+  // ===== Account Database =====
+  // ค่าเริ่มต้น (ใช้เมื่อยังไม่มีการแก้ไขสิทธิ์)
+  const defaultAccounts = {
+    'thanapun.k': { password: 'oat44567', displayName: 'Thanapun K.', role: 'head', roleLabel: 'หัวหน้าฝ่ายประชาสัมพันธ์' },
+    'apinanun.s': { password: 'lib44567', displayName: 'Apinanun S.', role: 'admin', roleLabel: 'ผู้ดูแลระบบ' },
+    'thian': { password: 'thian44567', displayName: 'Thianrawich', role: 'admin', roleLabel: 'ผู้ดูแลระบบ (Super Admin)' }
   };
+
+  // ★ โหลด accounts ที่ถูกแก้ไขโดย thian จาก localStorage (ถ้ามี)
+  function getAccounts() {
+    try {
+      var custom = localStorage.getItem('cc_pr_custom_accounts');
+      if (custom) {
+        var parsed = JSON.parse(custom);
+        // merge: ใช้ password จาก default ถ้า custom ไม่มี, เอา role/displayName จาก custom
+        var merged = {};
+        // เอา default passwords ที่ custom อาจไม่ได้เก็บ
+        Object.keys(defaultAccounts).forEach(function(u) {
+          if (parsed[u]) {
+            merged[u] = Object.assign({}, defaultAccounts[u], parsed[u]);
+            if (!merged[u].password) merged[u].password = defaultAccounts[u].password;
+          } else {
+            // ถูกลบออกจากระบบ — ไม่เพิ่ม
+          }
+        });
+        // เอา custom accounts ที่เพิ่มใหม่
+        Object.keys(parsed).forEach(function(u) {
+          if (!merged[u] && parsed[u].password) {
+            merged[u] = parsed[u];
+          }
+        });
+        // thian ต้องอยู่เสมอ
+        if (!merged['thian']) merged['thian'] = defaultAccounts['thian'];
+        return merged;
+      }
+    } catch(e) {}
+    return defaultAccounts;
+  }
+
+  var accounts = getAccounts();
 
   let loggedInUser = null;
 
@@ -210,6 +229,7 @@
           loggedInAt: new Date().toISOString()
         };
         localStorage.setItem('cc_pr_user', JSON.stringify(loggedInUser));
+        localStorage.setItem('cc_pr_lastActivity', Date.now().toString());
 
         var overlay = document.getElementById('successOverlay');
         document.getElementById('welcomeText').textContent = 'ยินดีต้อนรับ, ' + account.displayName;
@@ -249,8 +269,15 @@
       if (raw) {
         var user = JSON.parse(raw);
         var loginTime = new Date(user.loggedInAt).getTime();
-        if (Date.now() - loginTime < 24*60*60*1000) { window.location.href = 'dashboard.html'; }
-        else { localStorage.removeItem('cc_pr_user'); }
+        var lastAct = parseInt(localStorage.getItem('cc_pr_lastActivity') || '0', 10);
+        var inactiveMs = Date.now() - lastAct;
+        // login ไม่เกิน 24 ชม. + ไม่หยุดใช้เกิน 30 นาที
+        if (Date.now() - loginTime < 24*60*60*1000 && inactiveMs < 30*60*1000) {
+          window.location.href = 'dashboard.html';
+        } else {
+          localStorage.removeItem('cc_pr_user');
+          localStorage.removeItem('cc_pr_lastActivity');
+        }
       }
     } catch(e) {}
   })();
