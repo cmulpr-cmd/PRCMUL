@@ -437,7 +437,7 @@ function PermissionsPanel({visible,onClose}){
   const[newU,setNewU]=useState("");const[newD,setNewD]=useState("");const[newP,setNewP]=useState("");const[newR,setNewR]=useState("viewer");
   const[msg,setMsg]=useState(null);
 
-  useEffect(()=>{if(visible){setLoading(true);api.getPermissions().then(p=>{setAccounts(p||{'thanapun.k':{displayName:'Thanapun K.',role:'head',roleLabel:'หัวหน้าฝ่ายประชาสัมพันธ์',password:'oat44567'},'apinanun.s':{displayName:'Apinanun S.',role:'admin',roleLabel:'ผู้ดูแลระบบ',password:'lib44567'},'thian':{displayName:'Thianrawich',role:'admin',roleLabel:'ผู้ดูแลระบบ (Super Admin)',password:'thian44567'}});setLoading(false);});}},[visible]);
+  useEffect(()=>{if(visible){setLoading(true);api.getPermissions().then(p=>{setAccounts(p||{'thanapun.k':{displayName:'คุณธนะพันธุ์ การคนซื่อ',role:'head',roleLabel:'หัวหน้าหน่วยสื่อสารองค์กร',password:'oat44567'},'apinanun.s':{displayName:'คุณอาภินานันท์ ศรีมา',role:'admin',roleLabel:'ผู้ดูแลระบบ',password:'lib44567'},'thian':{displayName:'คุณเธียรวิชญ์ พิชญนันท์กุล',role:'admin',roleLabel:'ผู้ดูแลระบบ (Super Admin)',password:'thian44567'}});setLoading(false);});}},[visible]);
 
   const save=async(updated)=>{setAccounts(updated);const r=await api.savePermissions(updated);if(r.error)setMsg({ok:false,text:r.error});else setMsg({ok:true,text:"บันทึกสิทธิ์ไป Google Sheet สำเร็จ!"});setTimeout(()=>setMsg(null),3000);};
 
