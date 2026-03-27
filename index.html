@@ -153,46 +153,36 @@
 </div>
 
 <script>
-  // ===== Account Database =====
-  // ค่าเริ่มต้น (ใช้เมื่อยังไม่มีการแก้ไขสิทธิ์)
+  // ★★★ วาง URL ของ Google Apps Script Web App ที่นี่ (URL เดียวกับ dashboard.html) ★★★
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbgS1p5LXE3U7zlq1NdZithqP6pN9X7GcJIkOz9jFYnKP7xZBAbrq2xDeXtnw6w2pE/exec";
+
+  // ===== Account Database (ค่าเริ่มต้น ใช้ fallback เมื่อ Google ไม่ตอบ) =====
   const defaultAccounts = {
-    'thanapun.k': { password: 'oat44567', displayName: 'คุณธนะพันธุ์ การคนซื่อ', role: 'head', roleLabel: 'หัวหน้าฝ่ายประชาสัมพันธ์' },
-    'apinanun.s': { password: 'lib44567', displayName: 'คุณอาภินานันท์ ศรีมา', role: 'admin', roleLabel: 'ผู้ดูแลระบบ' },
-    'thian': { password: 'lib498800', displayName: 'คุณเธียรวิชญ์ พิชญนันท์กุล', role: 'admin', roleLabel: 'ผู้ดูแลระบบ (Super Admin)' }
+    'thanapun.k': { password: 'oat44567', displayName: 'Thanapun K.', role: 'head', roleLabel: 'หัวหน้าฝ่ายประชาสัมพันธ์' },
+    'apinanun.s': { password: 'lib44567', displayName: 'Apinanun S.', role: 'admin', roleLabel: 'ผู้ดูแลระบบ' },
+    'thian': { password: 'thian44567', displayName: 'Thianrawich', role: 'admin', roleLabel: 'ผู้ดูแลระบบ (Super Admin)' }
   };
 
-  // ★ โหลด accounts ที่ถูกแก้ไขโดย thian จาก localStorage (ถ้ามี)
-  function getAccounts() {
-    try {
-      var custom = localStorage.getItem('cc_pr_custom_accounts');
-      if (custom) {
-        var parsed = JSON.parse(custom);
-        // merge: ใช้ password จาก default ถ้า custom ไม่มี, เอา role/displayName จาก custom
-        var merged = {};
-        // เอา default passwords ที่ custom อาจไม่ได้เก็บ
-        Object.keys(defaultAccounts).forEach(function(u) {
-          if (parsed[u]) {
-            merged[u] = Object.assign({}, defaultAccounts[u], parsed[u]);
-            if (!merged[u].password) merged[u].password = defaultAccounts[u].password;
-          } else {
-            // ถูกลบออกจากระบบ — ไม่เพิ่ม
-          }
-        });
-        // เอา custom accounts ที่เพิ่มใหม่
-        Object.keys(parsed).forEach(function(u) {
-          if (!merged[u] && parsed[u].password) {
-            merged[u] = parsed[u];
-          }
-        });
-        // thian ต้องอยู่เสมอ
-        if (!merged['thian']) merged['thian'] = defaultAccounts['thian'];
-        return merged;
-      }
-    } catch(e) {}
-    return defaultAccounts;
-  }
+  var accounts = defaultAccounts; // ← เริ่มจาก default ก่อน
+  var accountsLoaded = false;
 
-  var accounts = getAccounts();
+  // ★ โหลด accounts จาก Google Sheet ตอนเปิดหน้า
+  (async function loadAccountsFromGoogle() {
+    try {
+      if (SCRIPT_URL.indexOf("ใส่_URL") !== -1) { accountsLoaded = true; return; } // ยังไม่ได้ตั้ง URL
+      var res = await fetch(SCRIPT_URL + "?action=getAccounts");
+      var data = await res.json();
+      if (data.accounts && Object.keys(data.accounts).length > 0) {
+        accounts = data.accounts;
+        // thian ต้องมีเสมอ
+        if (!accounts['thian']) accounts['thian'] = defaultAccounts['thian'];
+        console.log("Accounts loaded from Google Sheet:", Object.keys(accounts));
+      }
+    } catch(e) {
+      console.warn("ไม่สามารถโหลดจาก Google Sheet ได้ ใช้ค่าเริ่มต้น:", e.message);
+    }
+    accountsLoaded = true;
+  })();
 
   let loggedInUser = null;
 
@@ -218,7 +208,20 @@
     errorMsg.classList.remove('show'); errorMsg.textContent = '';
     btn.classList.add('loading');
 
-    setTimeout(function() {
+    // ★ รอให้ accounts โหลดจาก Google Sheet เสร็จก่อน (สูงสุด 5 วินาที)
+    var waitCount = 0;
+    var waitTimer = setInterval(function() {
+      waitCount++;
+      if (accountsLoaded || waitCount > 50) { // 50 x 100ms = 5s max
+        clearInterval(waitTimer);
+        doLogin(username, password, errorMsg, btn, card);
+      }
+    }, 100);
+
+    return false;
+  }
+
+  function doLogin(username, password, errorMsg, btn, card) {
       const account = accounts[username];
       if (account && account.password === password) {
         loggedInUser = {
@@ -253,8 +256,6 @@
         card.classList.add('shake');
         setTimeout(function() { card.classList.remove('shake'); }, 500);
       }
-    }, 800);
-    return false;
   }
 
   function goToDashboard() {
