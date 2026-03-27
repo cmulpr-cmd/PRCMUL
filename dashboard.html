@@ -1,63 +1,50 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>PR CMUL Dashboard — ระบบสรุปผลการดำเนินการ</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:#0f172a;font-family:'Noto Sans Thai','Outfit',sans-serif;}
-  @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-  @keyframes slideUp{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
-  @keyframes spin{to{transform:rotate(360deg);}}
-  ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(148,163,184,0.2);border-radius:3px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0f172a;font-family:'Noto Sans Thai','Outfit',sans-serif;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes slideUp{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes pulse2{0%,100%{opacity:1;}50%{opacity:.5;}}
+::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(148,163,184,0.2);border-radius:3px;}
 </style>
 <script>
 (function(){
   var allowed=false;
-  var TIMEOUT_MS=30*60*1000; // ★ 30 นาที
   try{
     var raw=localStorage.getItem('cc_pr_user');
     if(raw){var user=JSON.parse(raw);
       if(user.username&&user.displayName&&user.role&&user.loggedInAt){
-        // เช็ค login ไม่เกิน 24 ชม.
+        var TIMEOUT_MS=30*60*1000;
         if(Date.now()-new Date(user.loggedInAt).getTime()<24*60*60*1000){
-          // ★ เช็ค lastActivity ไม่เกิน 30 นาที
           var lastAct=localStorage.getItem('cc_pr_lastActivity');
           if(lastAct&&(Date.now()-parseInt(lastAct,10))>TIMEOUT_MS){
-            // หมดเวลา — ลบข้อมูลทั้งหมด
-            localStorage.removeItem('cc_pr_user');
-            localStorage.removeItem('cc_pr_lastActivity');
-          } else {
-            // ยังไม่หมดเวลา — อัปเดต activity
-            localStorage.setItem('cc_pr_lastActivity',Date.now().toString());
-            allowed=true;
-          }
-        } else {
-          localStorage.removeItem('cc_pr_user');
-          localStorage.removeItem('cc_pr_lastActivity');
-        }
+            localStorage.removeItem('cc_pr_user');localStorage.removeItem('cc_pr_lastActivity');
+          }else{localStorage.setItem('cc_pr_lastActivity',Date.now().toString());allowed=true;}
+        }else{localStorage.removeItem('cc_pr_user');localStorage.removeItem('cc_pr_lastActivity');}
       }
     }
   }catch(e){}
   if(!allowed){
     window.__AUTH_BLOCKED__=true;
-    // ★ เช็คว่าหมดเวลาหรือไม่เคย login
-    var wasTimeout=false;
-    try{var r=localStorage.getItem('cc_pr_user');if(!r){var la=document.referrer;if(la.indexOf('dashboard')>-1)wasTimeout=true;}}catch(e){}
     document.addEventListener('DOMContentLoaded',function(){
       document.getElementById('root').innerHTML=
         '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);font-family:Noto Sans Thai,sans-serif">'+
         '<div style="background:rgba(30,41,59,0.9);border-radius:20px;padding:48px 40px;text-align:center;max-width:440px;width:90%;border:1px solid rgba(148,163,184,0.15);box-shadow:0 25px 60px rgba(0,0,0,0.5)">'+
         '<div style="font-size:64px;margin-bottom:16px">&#128274;</div>'+
         '<h1 style="color:#f8fafc;font-size:22px;font-weight:700;margin-bottom:8px">ไม่ได้รับอนุญาต</h1>'+
-        '<p style="color:#94a3b8;font-size:15px;line-height:1.7;margin-bottom:28px">กรุณาเข้าสู่ระบบผ่านหน้า Login ก่อน<br>เพื่อเข้าใช้งานระบบ Dashboard</p>'+
-        '<a href="index.html" style="display:inline-block;padding:14px 36px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;text-decoration:none;font-weight:600;font-size:15px;box-shadow:0 4px 20px rgba(124,58,237,0.4)">ไปยังหน้าเข้าสู่ระบบ →</a>'+
+        '<p style="color:#94a3b8;font-size:15px;line-height:1.7;margin-bottom:28px">กรุณาเข้าสู่ระบบผ่านหน้า Login ก่อน</p>'+
+        '<a href="index.html" style="display:inline-block;padding:14px 36px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;text-decoration:none;font-weight:600;font-size:15px">ไปยังหน้าเข้าสู่ระบบ →</a>'+
         '</div></div>';
     });
   }
@@ -68,14 +55,16 @@
 <div id="root"></div>
 <script type="text/babel">
 if(window.__AUTH_BLOCKED__) throw new Error('auth');
-
 const{useState,useEffect,useCallback,useRef}=React;
+
+// ★★★ วาง URL ของ Google Apps Script Web App ที่นี่ ★★★
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwbgS1p5LXE3U7zlq1NdZithqP6pN9X7GcJIkOz9jFYnKP7xZBAbrq2xDeXtnw6w2pE/exec";
 
 const MONTHS_TH=["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
 const MONTHS_SHORT=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 const YEARS=[2568,2569,2570];
 const MONTH_ICONS=["❄️","💕","🌸","☀️","🌧️","🌈","🌻","⛅","🍂","🎃","🍁","🎄"];
-
+const MONTH_EN=["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
 const STATUS_COLORS={
   uploaded:{bg:"#dcfce7",text:"#166534",border:"#86efac",label:"รายงานแล้ว"},
   pending:{bg:"#fef9c3",text:"#854d0e",border:"#fde047",label:"ยังไม่ได้ดำเนินการ"},
@@ -84,73 +73,70 @@ const STATUS_COLORS={
 
 function getUser(){try{return JSON.parse(localStorage.getItem('cc_pr_user'));}catch(e){return null;}}
 
-// ★ ข้อมูลลิงก์ embed ของแต่ละเดือน — แก้ไข URL ได้ที่นี่
-function getDefaultEmbedData(){
+// ★★★ Google Sheets API ★★★
+const api={
+  async getReports(){
+    try{
+      const r=await fetch(SCRIPT_URL+"?action=getReports");
+      const d=await r.json();return d.reports||{};
+    }catch(e){console.error("API getReports:",e);return{};}
+  },
+  async saveReport(data){
+    try{
+      const r=await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"saveReport",data}),headers:{"Content-Type":"text/plain"}});
+      return await r.json();
+    }catch(e){console.error("API saveReport:",e);return{error:e.message};}
+  },
+  async deleteReport(year,month){
+    try{
+      const r=await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"deleteReport",year,month}),headers:{"Content-Type":"text/plain"}});
+      return await r.json();
+    }catch(e){console.error("API deleteReport:",e);return{error:e.message};}
+  },
+  async getPermissions(){
+    try{
+      const r=await fetch(SCRIPT_URL+"?action=getPermissions");
+      const d=await r.json();return d.permissions;
+    }catch(e){console.error("API getPermissions:",e);return null;}
+  },
+  async savePermissions(data){
+    try{
+      const r=await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"savePermissions",data}),headers:{"Content-Type":"text/plain"}});
+      return await r.json();
+    }catch(e){console.error("API savePermissions:",e);return{error:e.message};}
+  }
+};
+
+// ★ สร้างข้อมูลเปล่า
+function emptyData(){
   const data={};
-  YEARS.forEach(y=>{
-    data[y]={};
-    MONTHS_TH.forEach((m,i)=>{
-      data[y][m]={
-        embedUrl:"",
-        fileName:null,
-        fileSize:null,
-        uploadDate:null,
-        cloudinaryUrl:null,
-        cloudinaryId:null,
-        status:"empty"
-      };
-    });
-  });
+  YEARS.forEach(y=>{data[y]={};MONTHS_TH.forEach(m=>{data[y][m]={embedUrl:"",fileName:null,fileSize:null,uploadDate:null,cloudinaryUrl:null,cloudinaryId:null,status:"empty"};});});
+  return data;
+}
+// ★ merge ข้อมูลจาก Google Sheet เข้ากับ template
+function mergeData(saved){
+  const data=emptyData();
+  if(!saved)return data;
+  Object.keys(saved).forEach(y=>{if(data[y]){Object.keys(saved[y]).forEach(m=>{if(data[y][m]){data[y][m]={...data[y][m],...saved[y][m]};}});}});
   return data;
 }
 
-// ★ โหลดข้อมูลรายงานจาก localStorage (ถ้ามี)
-function loadReportData(){
-  try{
-    const raw=localStorage.getItem("cc_pr_reportData");
-    if(raw){
-      const saved=JSON.parse(raw);
-      // merge กับ default เพื่อให้มีปีและเดือนครบ
-      const def=getDefaultEmbedData();
-      YEARS.forEach(y=>{
-        if(saved[y]){
-          MONTHS_TH.forEach(m=>{
-            if(saved[y][m]){
-              def[y][m]={...def[y][m],...saved[y][m]};
-            }
-          });
-        }
-      });
-      return def;
-    }
-  }catch(e){console.error("Load report error:",e);}
-  return getDefaultEmbedData();
-}
-
-// ★ บันทึกข้อมูลรายงานลง localStorage
-function saveReportData(data){
-  try{localStorage.setItem("cc_pr_reportData",JSON.stringify(data));}
-  catch(e){console.error("Save report error:",e);}
-}
+// ★★★ Components ★★★
 
 function StatCard({icon,label,value,color,delay}){
-  return(
-    <div style={{background:"rgba(30,41,59,0.7)",borderRadius:16,padding:"20px 24px",border:`1px solid ${color}22`,position:"relative",overflow:"hidden",animation:`fadeUp 0.5s ease ${delay}s both`,backdropFilter:"blur(10px)"}}>
-      <div style={{position:"absolute",top:-20,right:-20,width:80,height:80,borderRadius:"50%",background:`${color}10`}} />
-      <div style={{fontSize:28,marginBottom:8}}>{icon}</div>
-      <div style={{color:"#94a3b8",fontSize:11,fontWeight:500,marginBottom:4,lineHeight:1.4}}>{label}</div>
-      <div style={{color:"#f8fafc",fontSize:28,fontWeight:800}}>{value}</div>
-    </div>
-  );
+  return(<div style={{background:"rgba(30,41,59,0.7)",borderRadius:16,padding:"20px 24px",border:`1px solid ${color}22`,position:"relative",overflow:"hidden",animation:`fadeUp 0.5s ease ${delay}s both`}}>
+    <div style={{position:"absolute",top:-20,right:-20,width:80,height:80,borderRadius:"50%",background:`${color}10`}}/>
+    <div style={{fontSize:28,marginBottom:8}}>{icon}</div>
+    <div style={{color:"#94a3b8",fontSize:11,fontWeight:500,marginBottom:4,lineHeight:1.4}}>{label}</div>
+    <div style={{color:"#f8fafc",fontSize:28,fontWeight:800}}>{value}</div>
+  </div>);
 }
 
-// ★ ดึง domain จาก URL เพื่อแสดง
 function getDomain(url){try{return new URL(url).hostname.replace("www.","");}catch(e){return url;}}
 function getLinkIcon(url){
   const d=getDomain(url).toLowerCase();
   if(d.includes("google"))return{icon:"📊",color:"#4285f4",label:"Google"};
   if(d.includes("canva"))return{icon:"🎨",color:"#00c4cc",label:"Canva"};
-  if(d.includes("drive"))return{icon:"📁",color:"#0f9d58",label:"Google Drive"};
   if(d.includes("youtube"))return{icon:"▶️",color:"#ff0000",label:"YouTube"};
   if(d.includes("facebook")||d.includes("fb."))return{icon:"📘",color:"#1877f2",label:"Facebook"};
   if(d.includes("github"))return{icon:"💻",color:"#6e5494",label:"GitHub"};
@@ -159,62 +145,37 @@ function getLinkIcon(url){
 }
 
 function MonthCard({month,index,data,onOpenAdmin,canAdmin}){
-  const [hover,setHover]=useState(false);
+  const[hover,setHover]=useState(false);
   const status=STATUS_COLORS[data.status];
   const hasEmbed=data.embedUrl&&data.embedUrl.trim()!=="";
   const hasFile=data.fileName;
   const hasContent=hasEmbed||hasFile;
-
   return(
-    <div style={{background:"rgba(30,41,59,0.6)",borderRadius:16,overflow:"hidden",border:hover?"1px solid rgba(124,58,237,0.3)":"1px solid rgba(148,163,184,0.1)",transition:"all 0.3s ease",animation:`fadeUp 0.4s ease ${index*0.05}s both`,transform:hover?"translateY(-4px)":"translateY(0)",boxShadow:hover?"0 12px 40px rgba(0,0,0,0.3)":"none"}} onMouseOver={()=>setHover(true)} onMouseOut={()=>setHover(false)}>
-      {/* Header */}
+    <div style={{background:"rgba(30,41,59,0.6)",borderRadius:16,overflow:"hidden",border:hover?"1px solid rgba(124,58,237,0.3)":"1px solid rgba(148,163,184,0.1)",transition:"all 0.3s",animation:`fadeUp 0.4s ease ${index*0.05}s both`,transform:hover?"translateY(-4px)":"none",boxShadow:hover?"0 12px 40px rgba(0,0,0,0.3)":"none"}} onMouseOver={()=>setHover(true)} onMouseOut={()=>setHover(false)}>
       <div style={{padding:"14px 18px",display:"flex",alignItems:"center",justifyContent:"space-between",borderBottom:"1px solid rgba(148,163,184,0.08)"}}>
-        <div style={{display:"flex",alignItems:"center",gap:8}}>
-          <span style={{fontSize:20}}>{MONTH_ICONS[index]}</span>
-          <span style={{color:"#f8fafc",fontWeight:700,fontSize:15}}>{month}</span>
-        </div>
+        <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:20}}>{MONTH_ICONS[index]}</span><span style={{color:"#f8fafc",fontWeight:700,fontSize:15}}>{month}</span></div>
         <span style={{fontSize:10,fontWeight:600,padding:"3px 10px",borderRadius:20,background:status.bg,color:status.text,border:`1px solid ${status.border}`}}>{status.label}</span>
       </div>
-
-      {/* Content */}
       <div style={{padding:"14px 18px"}}>
         {hasContent?(
           <div>
-            {/* ★ Link Preview Card (แทน iframe) */}
-            {hasEmbed&&(()=>{
-              const info=getLinkIcon(data.embedUrl);
-              return(
-                <div style={{marginBottom:hasFile?10:0}}>
-                  {/* Preview card */}
-                  <div style={{borderRadius:10,border:"1px solid rgba(148,163,184,0.12)",background:"rgba(15,23,42,0.5)",overflow:"hidden"}}>
-                    {/* Color bar top */}
-                    <div style={{height:4,background:info.color}} />
-                    <div style={{padding:"14px 16px"}}>
-                      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-                        <div style={{width:40,height:40,borderRadius:10,background:info.color+"18",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>
-                          {info.icon}
-                        </div>
-                        <div style={{flex:1,minWidth:0}}>
-                          <div style={{color:"#e2e8f0",fontSize:13,fontWeight:700,marginBottom:2}}>รายงานเดือน{month}</div>
-                          <div style={{color:"#64748b",fontSize:11,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{info.label} • {getDomain(data.embedUrl)}</div>
-                        </div>
-                      </div>
-                      <div style={{color:"#94a3b8",fontSize:11,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginBottom:10,padding:"6px 10px",borderRadius:6,background:"rgba(15,23,42,0.5)",fontFamily:"'Outfit',monospace"}}>
-                        {data.embedUrl}
+            {hasEmbed&&(()=>{const info=getLinkIcon(data.embedUrl);return(
+              <div style={{marginBottom:hasFile?10:0}}>
+                <div style={{borderRadius:10,border:"1px solid rgba(148,163,184,0.12)",background:"rgba(15,23,42,0.5)",overflow:"hidden"}}>
+                  <div style={{height:4,background:info.color}}/>
+                  <div style={{padding:"14px 16px"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+                      <div style={{width:40,height:40,borderRadius:10,background:info.color+"18",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{info.icon}</div>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{color:"#e2e8f0",fontSize:13,fontWeight:700,marginBottom:2}}>รายงานเดือน{month}</div>
+                        <div style={{color:"#64748b",fontSize:11,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{info.label} • {getDomain(data.embedUrl)}</div>
                       </div>
                     </div>
+                    <div style={{color:"#94a3b8",fontSize:11,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",padding:"6px 10px",borderRadius:6,background:"rgba(15,23,42,0.5)",fontFamily:"'Outfit',monospace"}}>{data.embedUrl}</div>
                   </div>
-                  {/* ปุ่มเปิด */}
-                  <a href={data.embedUrl} target="_blank" rel="noopener noreferrer" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,padding:"10px 16px",borderRadius:8,marginTop:8,background:"rgba(124,58,237,0.12)",border:"1px solid rgba(124,58,237,0.25)",color:"#a78bfa",fontSize:12,fontWeight:600,textDecoration:"none",fontFamily:"'Noto Sans Thai',sans-serif",transition:"background 0.2s"}}
-                    onMouseOver={e=>{e.currentTarget.style.background="rgba(124,58,237,0.25)";}}
-                    onMouseOut={e=>{e.currentTarget.style.background="rgba(124,58,237,0.12)";}}>
-                    🔗 แสดงผลฉบับเต็ม (เปิดแท็บใหม่)
-                  </a>
                 </div>
-              );
-            })()}
-
-            {/* Uploaded file info */}
+                <a href={data.embedUrl} target="_blank" rel="noopener noreferrer" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,padding:"10px 16px",borderRadius:8,marginTop:8,background:"rgba(124,58,237,0.12)",border:"1px solid rgba(124,58,237,0.25)",color:"#a78bfa",fontSize:12,fontWeight:600,textDecoration:"none",fontFamily:"'Noto Sans Thai',sans-serif"}}>🔗 แสดงผลฉบับเต็ม (เปิดแท็บใหม่)</a>
+              </div>);})()}
             {hasFile&&(
               <div style={{padding:"10px 12px",borderRadius:8,background:"rgba(34,197,94,0.06)",border:"1px solid rgba(34,197,94,0.15)",marginTop:hasEmbed?8:0}}>
                 <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -222,25 +183,14 @@ function MonthCard({month,index,data,onOpenAdmin,canAdmin}){
                   <span style={{color:"#86efac",fontSize:12,fontWeight:600,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{data.fileName}</span>
                   <span style={{color:"#4ade80",fontSize:11,whiteSpace:"nowrap"}}>{data.fileSize}</span>
                 </div>
-                {data.cloudinaryUrl&&(
-                  <a href={data.cloudinaryUrl} target="_blank" rel="noopener noreferrer"
-                    style={{display:"inline-flex",alignItems:"center",gap:4,marginTop:6,color:"#60a5fa",fontSize:11,textDecoration:"none",fontWeight:500}}>
-                    ☁️ ดูไฟล์บน Cloud →
-                  </a>
-                )}
+                {data.cloudinaryUrl&&(<a href={data.cloudinaryUrl} target="_blank" rel="noopener noreferrer" style={{display:"inline-flex",alignItems:"center",gap:4,marginTop:6,color:"#60a5fa",fontSize:11,textDecoration:"none",fontWeight:500}}>☁️ ดูไฟล์บน Cloud →</a>)}
               </div>
             )}
           </div>
         ):(
           <div style={{textAlign:"center",padding:"20px 0"}}>
-            <p style={{color:"#64748b",fontSize:13,marginBottom:12}}>
-              {data.status==="pending"?"อยู่ระหว่างดำเนินการ":"ยังไม่มีข้อมูลรายงาน"}
-            </p>
-            {canAdmin&&(
-              <button onClick={(e)=>{e.stopPropagation();onOpenAdmin();}} style={{padding:"8px 20px",borderRadius:8,border:"1px solid rgba(124,58,237,0.3)",background:"rgba(124,58,237,0.1)",color:"#a78bfa",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"'Noto Sans Thai', sans-serif"}}>
-                เพิ่มลิงก์ / อัปโหลดไฟล์
-              </button>
-            )}
+            <p style={{color:"#64748b",fontSize:13,marginBottom:12}}>{data.status==="pending"?"อยู่ระหว่างดำเนินการ":"ยังไม่มีข้อมูลรายงาน"}</p>
+            {canAdmin&&(<button onClick={e=>{e.stopPropagation();onOpenAdmin();}} style={{padding:"8px 20px",borderRadius:8,border:"1px solid rgba(124,58,237,0.3)",background:"rgba(124,58,237,0.1)",color:"#a78bfa",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"'Noto Sans Thai',sans-serif"}}>เพิ่มลิงก์ / อัปโหลดไฟล์</button>)}
           </div>
         )}
       </div>
@@ -248,238 +198,178 @@ function MonthCard({month,index,data,onOpenAdmin,canAdmin}){
   );
 }
 
-function AdminPanel({visible,onClose,reportData,setReportData,selectedYear}){
-  const [editMonth,setEditMonth]=useState(0);
-  const [urlInput,setUrlInput]=useState("");
-  const [statusInput,setStatusInput]=useState("uploaded");
-  const [saveMsg,setSaveMsg]=useState(null);
-  const [dragOver,setDragOver]=useState(false);
-  const [uploadSuccess,setUploadSuccess]=useState(null);
-  const [uploading,setUploading]=useState(false);
-  const [uploadError,setUploadError]=useState(null);
+// ★★★ Admin Panel ★★★
+function AdminPanel({visible,onClose,reportData,setReportData,selectedYear,onRefresh}){
+  const[editMonth,setEditMonth]=useState(0);
+  const[urlInput,setUrlInput]=useState("");
+  const[statusInput,setStatusInput]=useState("uploaded");
+  const[saving,setSaving]=useState(false);
+  const[saveMsg,setSaveMsg]=useState(null);
+  const[dragOver,setDragOver]=useState(false);
+  const[uploading,setUploading]=useState(false);
+  const[uploadMsg,setUploadMsg]=useState(null);
   const fileRef=useRef(null);
 
-  // ★ Cloudinary config
   const CLOUD_NAME="dpyhc69jg";
   const UPLOAD_PRESET="pr_cmul_upload";
-  const MONTH_EN=["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
 
-  // ★ อัปโหลดไฟล์ไป Cloudinary
-  const handleUpload=useCallback(async(files)=>{
-    if(!files||files.length===0)return;
-    const file=files[0];
-    const monthName=MONTHS_TH[editMonth];
-
-    // เช็คขนาดไฟล์ (10MB สำหรับ free plan)
-    if(file.size>10*1024*1024){
-      setUploadError("ไฟล์ใหญ่เกิน 10MB กรุณาเลือกไฟล์ที่เล็กกว่า");
-      setTimeout(()=>setUploadError(null),5000);
-      return;
-    }
-
-    setUploading(true);
-    setUploadError(null);
-
-    try{
-      // สร้าง FormData
-      const formData=new FormData();
-      formData.append("file",file);
-      formData.append("upload_preset",UPLOAD_PRESET);
-      formData.append("folder","pr_cmul/"+selectedYear+"/"+MONTH_EN[editMonth]);
-
-      // ★ เลือก resource_type ตามชนิดไฟล์
-      let resourceType="auto";
-      const ext=file.name.split(".").pop().toLowerCase();
-      if(["jpg","jpeg","png","gif","webp","svg","bmp"].includes(ext)){
-        resourceType="image";
-      }else if(["mp4","mov","avi","webm"].includes(ext)){
-        resourceType="video";
-      }else{
-        resourceType="raw"; // PDF, DOC, XLSX, PPTX etc.
-      }
-
-      const url="https://api.cloudinary.com/v1_1/"+CLOUD_NAME+"/"+resourceType+"/upload";
-
-      console.log("Uploading to:",url);
-      console.log("File:",file.name,"Type:",file.type,"Size:",file.size,"ResourceType:",resourceType);
-
-      const res=await fetch(url,{
-        method:"POST",
-        body:formData
-      });
-
-      const responseText=await res.text();
-      console.log("Response status:",res.status,"Body:",responseText);
-
-      let data;
-      try{data=JSON.parse(responseText);}catch(e){
-        throw new Error("Server response: "+responseText.substring(0,200));
-      }
-
-      if(!res.ok){
-        throw new Error(data.error?.message||"Cloudinary error: "+res.status);
-      }
-
-      // ★ บันทึกข้อมูลไฟล์ + ลิงก์ Cloudinary
-      setReportData(prev=>{
-        const u=JSON.parse(JSON.stringify(prev));
-        u[selectedYear][monthName]={
-          ...u[selectedYear][monthName],
-          status:"uploaded",
-          fileName:file.name,
-          fileSize:`${(file.size/(1024*1024)).toFixed(1)} MB`,
-          uploadDate:new Date().toLocaleDateString("th-TH"),
-          cloudinaryUrl:data.secure_url,
-          cloudinaryId:data.public_id
-        };
-        return u;
-      });
-
-      setUploadSuccess(file.name+" ✓ บันทึกบน Cloud เรียบร้อย");
-      setTimeout(()=>setUploadSuccess(null),4000);
-
-    }catch(err){
-      console.error("Upload error:",err);
-      setUploadError("อัปโหลดล้มเหลว: "+err.message);
-      setTimeout(()=>setUploadError(null),8000);
-    }finally{
-      setUploading(false);
-    }
-  },[editMonth,selectedYear,setReportData]);
-
-  // ★ บันทึกลิงก์ embed
-  const handleSave=()=>{
-    const monthName=MONTHS_TH[editMonth];
-    setReportData(prev=>{
-      const u=JSON.parse(JSON.stringify(prev));
-      u[selectedYear][monthName]={
-        ...u[selectedYear][monthName],
-        embedUrl:urlInput.trim(),
-        status:urlInput.trim()?statusInput:(u[selectedYear][monthName].fileName?"uploaded":"empty")
-      };
-      return u;
-    });
-    setSaveMsg(monthName);
-    setTimeout(()=>setSaveMsg(null),2500);
-  };
-
-  const handleDelete=(m)=>{
-    setReportData(prev=>{
-      const u=JSON.parse(JSON.stringify(prev));
-      u[selectedYear][m]={embedUrl:"",status:"empty",fileName:null,fileSize:null,uploadDate:null};
-      return u;
-    });
-  };
-
+  // Load month data when switching
   useEffect(()=>{
     if(visible){
-      const monthName=MONTHS_TH[editMonth];
-      const d=reportData[selectedYear][monthName];
+      const d=reportData[selectedYear][MONTHS_TH[editMonth]];
       setUrlInput(d.embedUrl||"");
       setStatusInput(d.status==="empty"?"uploaded":d.status);
     }
   },[visible,editMonth,selectedYear]);
+
+  // ★ อัปโหลดไฟล์ไป Cloudinary แล้วบันทึก metadata ไป Google Sheet
+  const handleUpload=useCallback(async(files)=>{
+    if(!files||files.length===0)return;
+    const file=files[0];
+    if(file.size>10*1024*1024){setUploadMsg({ok:false,text:"ไฟล์ใหญ่เกิน 10MB"});setTimeout(()=>setUploadMsg(null),4000);return;}
+
+    setUploading(true);setUploadMsg(null);
+    const monthName=MONTHS_TH[editMonth];
+
+    try{
+      // 1. Upload to Cloudinary
+      const fd=new FormData();
+      fd.append("file",file);
+      fd.append("upload_preset",UPLOAD_PRESET);
+      fd.append("folder","pr_cmul/"+selectedYear+"/"+MONTH_EN[editMonth]);
+
+      const ext=file.name.split(".").pop().toLowerCase();
+      let rt="raw";
+      if(["jpg","jpeg","png","gif","webp","svg","bmp"].includes(ext))rt="image";
+      else if(["mp4","mov","avi","webm"].includes(ext))rt="video";
+
+      const cRes=await fetch("https://api.cloudinary.com/v1_1/"+CLOUD_NAME+"/"+rt+"/upload",{method:"POST",body:fd});
+      const cText=await cRes.text();
+      let cData;try{cData=JSON.parse(cText);}catch(e){throw new Error("Cloudinary: "+cText.substring(0,100));}
+      if(!cRes.ok)throw new Error(cData.error?.message||"Cloudinary error");
+
+      // 2. Save metadata to Google Sheet
+      const reportRow={
+        year:selectedYear,month:monthName,
+        embedUrl:urlInput.trim()||"",
+        fileName:file.name,
+        fileSize:(file.size/(1024*1024)).toFixed(1)+" MB",
+        uploadDate:new Date().toLocaleDateString("th-TH"),
+        cloudinaryUrl:cData.secure_url,
+        cloudinaryId:cData.public_id,
+        status:"uploaded"
+      };
+      const sRes=await api.saveReport(reportRow);
+      if(sRes.error)throw new Error("Google Sheet: "+sRes.error);
+
+      // 3. Update local state
+      setReportData(prev=>{
+        const u=JSON.parse(JSON.stringify(prev));
+        u[selectedYear][monthName]={embedUrl:urlInput.trim()||"",fileName:file.name,fileSize:reportRow.fileSize,uploadDate:reportRow.uploadDate,cloudinaryUrl:cData.secure_url,cloudinaryId:cData.public_id,status:"uploaded"};
+        return u;
+      });
+      setUploadMsg({ok:true,text:"อัปโหลด "+file.name+" สำเร็จ! (Cloudinary + Google Sheet)"});
+      setTimeout(()=>setUploadMsg(null),4000);
+    }catch(err){
+      console.error("Upload error:",err);
+      setUploadMsg({ok:false,text:"ผิดพลาด: "+err.message});
+      setTimeout(()=>setUploadMsg(null),8000);
+    }finally{setUploading(false);}
+  },[editMonth,selectedYear,setReportData,urlInput]);
+
+  // ★ บันทึกลิงก์ + สถานะ ไป Google Sheet
+  const handleSave=async()=>{
+    setSaving(true);setSaveMsg(null);
+    const monthName=MONTHS_TH[editMonth];
+    const existing=reportData[selectedYear][monthName];
+    const reportRow={
+      year:selectedYear,month:monthName,
+      embedUrl:urlInput.trim(),
+      fileName:existing.fileName||"",
+      fileSize:existing.fileSize||"",
+      uploadDate:existing.uploadDate||"",
+      cloudinaryUrl:existing.cloudinaryUrl||"",
+      cloudinaryId:existing.cloudinaryId||"",
+      status:urlInput.trim()||existing.fileName?statusInput:"empty"
+    };
+    try{
+      const res=await api.saveReport(reportRow);
+      if(res.error)throw new Error(res.error);
+      setReportData(prev=>{
+        const u=JSON.parse(JSON.stringify(prev));
+        u[selectedYear][monthName]={embedUrl:reportRow.embedUrl,fileName:reportRow.fileName||null,fileSize:reportRow.fileSize||null,uploadDate:reportRow.uploadDate||null,cloudinaryUrl:reportRow.cloudinaryUrl||null,cloudinaryId:reportRow.cloudinaryId||null,status:reportRow.status};
+        return u;
+      });
+      setSaveMsg({ok:true,text:"บันทึกเดือน "+monthName+" ไป Google Sheet สำเร็จ!"});
+    }catch(err){
+      setSaveMsg({ok:false,text:"ผิดพลาด: "+err.message});
+    }finally{setSaving(false);setTimeout(()=>setSaveMsg(null),4000);}
+  };
+
+  // ★ ลบข้อมูลเดือน
+  const handleDelete=async(m)=>{
+    if(!confirm("ลบข้อมูลเดือน "+m+" ?"))return;
+    await api.deleteReport(selectedYear,m);
+    setReportData(prev=>{const u=JSON.parse(JSON.stringify(prev));u[selectedYear][m]={embedUrl:"",fileName:null,fileSize:null,uploadDate:null,cloudinaryUrl:null,cloudinaryId:null,status:"empty"};return u;});
+  };
 
   if(!visible)return null;
 
   return(
     <div style={{position:"fixed",inset:0,zIndex:1000,background:"rgba(0,0,0,0.6)",backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",animation:"fadeIn 0.3s ease"}} onClick={onClose}>
       <div style={{background:"#1e293b",borderRadius:24,width:"90%",maxWidth:640,maxHeight:"90vh",overflow:"auto",border:"1px solid rgba(148,163,184,0.15)",boxShadow:"0 25px 60px rgba(0,0,0,0.5)",animation:"slideUp 0.4s ease"}} onClick={e=>e.stopPropagation()}>
-
-        {/* Header */}
         <div style={{padding:"24px 28px",borderBottom:"1px solid rgba(148,163,184,0.1)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <div><h2 style={{color:"#f8fafc",fontSize:20,fontWeight:700}}>⚙️ แผงควบคุมผู้ดูแล</h2><p style={{color:"#94a3b8",fontSize:13,marginTop:4}}>จัดการลิงก์รายงาน + อัปโหลดไฟล์สรุปผล</p></div>
-          <button onClick={onClose} style={{width:36,height:36,borderRadius:10,border:"1px solid rgba(148,163,184,0.2)",background:"rgba(148,163,184,0.1)",color:"#94a3b8",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+          <div><h2 style={{color:"#f8fafc",fontSize:20,fontWeight:700}}>⚙️ แผงควบคุมผู้ดูแล</h2><p style={{color:"#94a3b8",fontSize:13,marginTop:4}}>ข้อมูลบันทึกไปยัง Google Sheet อัตโนมัติ</p></div>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={onRefresh} style={{padding:"6px 14px",borderRadius:8,border:"1px solid rgba(59,130,246,0.3)",background:"rgba(59,130,246,0.1)",color:"#60a5fa",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"'Noto Sans Thai',sans-serif"}}>🔄 รีเฟรช</button>
+            <button onClick={onClose} style={{width:36,height:36,borderRadius:10,border:"1px solid rgba(148,163,184,0.2)",background:"rgba(148,163,184,0.1)",color:"#94a3b8",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+          </div>
         </div>
 
         <div style={{padding:"24px 28px"}}>
-
-          {/* ปีงบประมาณ */}
           <div style={{background:"rgba(124,58,237,0.1)",borderRadius:12,padding:"12px 16px",marginBottom:20,border:"1px solid rgba(124,58,237,0.2)",display:"flex",alignItems:"center",gap:8}}>
             <span style={{fontSize:18}}>📅</span><span style={{color:"#a78bfa",fontWeight:600,fontSize:14}}>ปีงบประมาณ {selectedYear}</span>
+            <span style={{marginLeft:"auto",fontSize:11,color:"#64748b"}}>💾 Google Sheet</span>
           </div>
 
           {/* เลือกเดือน */}
           <div style={{marginBottom:24}}>
             <label style={{color:"#94a3b8",fontSize:13,fontWeight:600,display:"block",marginBottom:8}}>เลือกเดือนที่ต้องการแก้ไข</label>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4, 1fr)",gap:6}}>
-              {MONTHS_SHORT.map((m,i)=>{
-                const d=reportData[selectedYear][MONTHS_TH[i]];
-                const hasData=(d.embedUrl&&d.embedUrl.trim()!=="")||d.fileName;
-                return(
-                  <button key={i} onClick={()=>setEditMonth(i)} style={{padding:"10px 4px",borderRadius:10,position:"relative",
-                    border:editMonth===i?"1px solid #7c3aed":"1px solid rgba(148,163,184,0.15)",
-                    background:editMonth===i?"rgba(124,58,237,0.15)":"rgba(15,23,42,0.5)",
-                    color:editMonth===i?"#a78bfa":"#94a3b8",fontSize:13,fontWeight:editMonth===i?700:500,
-                    cursor:"pointer",fontFamily:"'Noto Sans Thai', sans-serif"
-                  }}>
-                    {MONTH_ICONS[i]} {m}
-                    {hasData&&<span style={{position:"absolute",top:4,right:4,width:6,height:6,borderRadius:"50%",background:"#22c55e"}} />}
-                  </button>
-                );
-              })}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6}}>
+              {MONTHS_SHORT.map((m,i)=>{const d=reportData[selectedYear][MONTHS_TH[i]];const has=(d.embedUrl&&d.embedUrl.trim()!=="")||d.fileName;return(
+                <button key={i} onClick={()=>setEditMonth(i)} style={{padding:"10px 4px",borderRadius:10,position:"relative",border:editMonth===i?"1px solid #7c3aed":"1px solid rgba(148,163,184,0.15)",background:editMonth===i?"rgba(124,58,237,0.15)":"rgba(15,23,42,0.5)",color:editMonth===i?"#a78bfa":"#94a3b8",fontSize:13,fontWeight:editMonth===i?700:500,cursor:"pointer",fontFamily:"'Noto Sans Thai',sans-serif"}}>
+                  {MONTH_ICONS[i]} {m}{has&&<span style={{position:"absolute",top:4,right:4,width:6,height:6,borderRadius:"50%",background:"#22c55e"}}/>}
+                </button>);})}
             </div>
           </div>
 
-          {/* ═══════════ ส่วนที่ 1: ฝังลิงก์เว็บไซต์ ═══════════ */}
+          {/* ฝังลิงก์ */}
           <div style={{background:"rgba(15,23,42,0.4)",borderRadius:16,padding:"20px",marginBottom:20,border:"1px solid rgba(148,163,184,0.08)"}}>
-            <h3 style={{color:"#e2e8f0",fontSize:14,fontWeight:700,marginBottom:14,display:"flex",alignItems:"center",gap:8}}>
-              <span style={{fontSize:16}}>🔗</span> ฝังลิงก์เว็บไซต์รายงาน
-            </h3>
-            <input value={urlInput} onChange={e=>setUrlInput(e.target.value)}
-              placeholder="วางลิงก์ที่นี่ เช่น https://docs.google.com/..."
-              style={{width:"100%",padding:"12px 16px",borderRadius:10,border:"1px solid rgba(148,163,184,0.2)",
-                background:"rgba(15,23,42,0.6)",color:"#e2e8f0",fontSize:14,outline:"none",
-                fontFamily:"'Noto Sans Thai','Outfit',sans-serif",marginBottom:12}} />
-            <p style={{color:"#64748b",fontSize:11,marginBottom:0}}>
-              รองรับ Google Docs, Google Sheets, Canva, เว็บไซต์อื่นๆ — จะแสดงตัวอย่างเล็กๆ ในหน้ารายงานรายเดือน
-            </p>
+            <h3 style={{color:"#e2e8f0",fontSize:14,fontWeight:700,marginBottom:14}}>🔗 ฝังลิงก์เว็บไซต์รายงาน</h3>
+            <input value={urlInput} onChange={e=>setUrlInput(e.target.value)} placeholder="วางลิงก์ที่นี่ เช่น https://docs.google.com/..."
+              style={{width:"100%",padding:"12px 16px",borderRadius:10,border:"1px solid rgba(148,163,184,0.2)",background:"rgba(15,23,42,0.6)",color:"#e2e8f0",fontSize:14,outline:"none",fontFamily:"'Noto Sans Thai','Outfit',sans-serif",marginBottom:8}}/>
+            <p style={{color:"#64748b",fontSize:11}}>รองรับทุกลิงก์ — Google Docs, Canva, เว็บไซต์ทั่วไป</p>
           </div>
 
-          {/* ═══════════ ส่วนที่ 2: อัปโหลดไฟล์ไป Cloudinary ═══════════ */}
+          {/* อัปโหลดไฟล์ */}
           <div style={{background:"rgba(15,23,42,0.4)",borderRadius:16,padding:"20px",marginBottom:20,border:"1px solid rgba(148,163,184,0.08)"}}>
-            <h3 style={{color:"#e2e8f0",fontSize:14,fontWeight:700,marginBottom:4,display:"flex",alignItems:"center",gap:8}}>
-              <span style={{fontSize:16}}>📎</span> อัปโหลดไฟล์สรุปผลไป Cloud
-            </h3>
-            <p style={{color:"#64748b",fontSize:11,marginBottom:14}}>ไฟล์จะถูกอัปโหลดไปยัง Cloudinary โดยอัตโนมัติ</p>
-
+            <h3 style={{color:"#e2e8f0",fontSize:14,fontWeight:700,marginBottom:4}}>📎 อัปโหลดไฟล์ไป Cloud</h3>
+            <p style={{color:"#64748b",fontSize:11,marginBottom:14}}>ไฟล์ → Cloudinary • ข้อมูล → Google Sheet</p>
             {uploading?(
               <div style={{border:"2px dashed rgba(124,58,237,0.3)",borderRadius:12,padding:"32px 16px",textAlign:"center",background:"rgba(124,58,237,0.05)"}}>
                 <div style={{fontSize:36,marginBottom:8,animation:"spin 1s linear infinite"}}>⟳</div>
-                <p style={{color:"#a78bfa",fontSize:14,fontWeight:600}}>กำลังอัปโหลดไป Cloudinary...</p>
-                <p style={{color:"#64748b",fontSize:12,marginTop:4}}>กรุณารอสักครู่</p>
+                <p style={{color:"#a78bfa",fontSize:14,fontWeight:600}}>กำลังอัปโหลด...</p>
               </div>
             ):(
-              <div
-                onDragOver={e=>{e.preventDefault();setDragOver(true);}}
-                onDragLeave={()=>setDragOver(false)}
-                onDrop={e=>{e.preventDefault();setDragOver(false);handleUpload(e.dataTransfer.files);}}
-                onClick={()=>fileRef.current?.click()}
-                style={{border:`2px dashed ${dragOver?"#7c3aed":"rgba(148,163,184,0.2)"}`,borderRadius:12,
-                  padding:"28px 16px",textAlign:"center",cursor:"pointer",
-                  background:dragOver?"rgba(124,58,237,0.08)":"rgba(15,23,42,0.3)",
-                  transition:"all 0.3s"}}>
-                <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.xlsx,.xls,.pptx,.png,.jpg,.jpeg" style={{display:"none"}}
-                  onChange={e=>handleUpload(e.target.files)} />
+              <div onDragOver={e=>{e.preventDefault();setDragOver(true);}} onDragLeave={()=>setDragOver(false)} onDrop={e=>{e.preventDefault();setDragOver(false);handleUpload(e.dataTransfer.files);}} onClick={()=>fileRef.current?.click()}
+                style={{border:`2px dashed ${dragOver?"#7c3aed":"rgba(148,163,184,0.2)"}`,borderRadius:12,padding:"28px 16px",textAlign:"center",cursor:"pointer",background:dragOver?"rgba(124,58,237,0.08)":"rgba(15,23,42,0.3)"}}>
+                <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.xlsx,.xls,.pptx,.png,.jpg,.jpeg" style={{display:"none"}} onChange={e=>handleUpload(e.target.files)}/>
                 <div style={{fontSize:36,marginBottom:8,opacity:0.8}}>{dragOver?"📥":"☁️"}</div>
-                <p style={{color:"#e2e8f0",fontSize:14,fontWeight:600,marginBottom:4}}>
-                  {dragOver?"ปล่อยไฟล์ที่นี่":"คลิกหรือลากไฟล์มาวางที่นี่"}
-                </p>
-                <p style={{color:"#64748b",fontSize:11}}>
-                  รองรับ PDF, DOC, DOCX, XLSX, PPTX, PNG, JPG (สูงสุด 10MB)
-                </p>
+                <p style={{color:"#e2e8f0",fontSize:14,fontWeight:600,marginBottom:4}}>{dragOver?"ปล่อยไฟล์ที่นี่":"คลิกหรือลากไฟล์มาวางที่นี่"}</p>
+                <p style={{color:"#64748b",fontSize:11}}>รองรับ PDF, DOC, XLSX, PPTX, PNG, JPG (สูงสุด 10MB)</p>
               </div>
             )}
-
-            {/* Error */}
-            {uploadError&&(
-              <div style={{marginTop:12,background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:10,padding:"10px 14px",display:"flex",alignItems:"center",gap:8,animation:"fadeIn 0.3s ease"}}>
-                <span style={{fontSize:16}}>❌</span>
-                <span style={{color:"#f87171",fontSize:13,fontWeight:600}}>{uploadError}</span>
-              </div>
-            )}
-
-            {/* แสดงไฟล์ที่อัปโหลดแล้วของเดือนนี้ */}
+            {uploadMsg&&(<div style={{marginTop:12,background:uploadMsg.ok?"rgba(34,197,94,0.1)":"rgba(239,68,68,0.1)",border:`1px solid ${uploadMsg.ok?"rgba(34,197,94,0.3)":"rgba(239,68,68,0.3)"}`,borderRadius:10,padding:"10px 14px",display:"flex",alignItems:"center",gap:8,animation:"fadeIn 0.3s"}}><span style={{fontSize:16}}>{uploadMsg.ok?"✅":"❌"}</span><span style={{color:uploadMsg.ok?"#4ade80":"#f87171",fontSize:13,fontWeight:600}}>{uploadMsg.text}</span></div>)}
             {reportData[selectedYear][MONTHS_TH[editMonth]].fileName&&(
               <div style={{marginTop:12,padding:"12px 14px",borderRadius:10,background:"rgba(34,197,94,0.08)",border:"1px solid rgba(34,197,94,0.2)"}}>
                 <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -487,84 +377,43 @@ function AdminPanel({visible,onClose,reportData,setReportData,selectedYear}){
                   <span style={{color:"#86efac",fontSize:13,fontWeight:600,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{reportData[selectedYear][MONTHS_TH[editMonth]].fileName}</span>
                   <span style={{color:"#4ade80",fontSize:11}}>{reportData[selectedYear][MONTHS_TH[editMonth]].fileSize}</span>
                 </div>
-                {reportData[selectedYear][MONTHS_TH[editMonth]].cloudinaryUrl&&(
-                  <a href={reportData[selectedYear][MONTHS_TH[editMonth]].cloudinaryUrl} target="_blank" rel="noopener noreferrer"
-                    style={{display:"inline-flex",alignItems:"center",gap:4,marginTop:8,color:"#60a5fa",fontSize:11,textDecoration:"none",fontWeight:500}}>
-                    ☁️ ดูไฟล์บน Cloudinary →
-                  </a>
-                )}
-              </div>
-            )}
-
-            {uploadSuccess&&(
-              <div style={{marginTop:12,background:"rgba(34,197,94,0.1)",border:"1px solid rgba(34,197,94,0.3)",borderRadius:10,padding:"10px 14px",display:"flex",alignItems:"center",gap:8,animation:"fadeIn 0.3s ease"}}>
-                <span style={{fontSize:16}}>✅</span>
-                <span style={{color:"#4ade80",fontSize:13,fontWeight:600}}>อัปโหลด {uploadSuccess} สำเร็จ!</span>
+                {reportData[selectedYear][MONTHS_TH[editMonth]].cloudinaryUrl&&(<a href={reportData[selectedYear][MONTHS_TH[editMonth]].cloudinaryUrl} target="_blank" rel="noopener noreferrer" style={{display:"inline-flex",alignItems:"center",gap:4,marginTop:6,color:"#60a5fa",fontSize:11,textDecoration:"none",fontWeight:500}}>☁️ ดูไฟล์บน Cloudinary →</a>)}
               </div>
             )}
           </div>
 
-          {/* ═══════════ ส่วนที่ 3: สถานะ ═══════════ */}
+          {/* สถานะ */}
           <div style={{marginBottom:20}}>
-            <label style={{color:"#94a3b8",fontSize:13,fontWeight:600,display:"block",marginBottom:8}}>สถานะรายงานเดือนนี้</label>
+            <label style={{color:"#94a3b8",fontSize:13,fontWeight:600,display:"block",marginBottom:8}}>สถานะ</label>
             <div style={{display:"flex",gap:8}}>
               {[{v:"uploaded",l:"✅ รายงานแล้ว",c:"#22c55e"},{v:"pending",l:"⏳ ยังไม่ได้ดำเนินการ",c:"#eab308"}].map(s=>(
-                <button key={s.v} onClick={()=>setStatusInput(s.v)} style={{flex:1,padding:"10px",borderRadius:10,
-                  border:`1px solid ${statusInput===s.v?s.c+"66":"rgba(148,163,184,0.15)"}`,
-                  background:statusInput===s.v?s.c+"15":"rgba(15,23,42,0.5)",
-                  color:statusInput===s.v?s.c:"#94a3b8",fontSize:13,fontWeight:600,
-                  cursor:"pointer",fontFamily:"'Noto Sans Thai', sans-serif"}}>{s.l}</button>
+                <button key={s.v} onClick={()=>setStatusInput(s.v)} style={{flex:1,padding:"10px",borderRadius:10,border:`1px solid ${statusInput===s.v?s.c+"66":"rgba(148,163,184,0.15)"}`,background:statusInput===s.v?s.c+"15":"rgba(15,23,42,0.5)",color:statusInput===s.v?s.c:"#94a3b8",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"'Noto Sans Thai',sans-serif"}}>{s.l}</button>
               ))}
             </div>
           </div>
 
           {/* ปุ่มบันทึก */}
-          <button onClick={handleSave} style={{width:"100%",padding:"14px",borderRadius:12,border:"none",
-            background:"linear-gradient(135deg,#7c3aed,#6d28d9)",color:"#fff",fontSize:15,fontWeight:700,
-            cursor:"pointer",fontFamily:"'Noto Sans Thai', sans-serif",
-            boxShadow:"0 4px 16px rgba(124,58,237,0.3)",marginBottom:20}}>
-            💾 บันทึกข้อมูลเดือน {MONTHS_TH[editMonth]}
+          <button onClick={handleSave} disabled={saving} style={{width:"100%",padding:"14px",borderRadius:12,border:"none",background:saving?"#4b5563":"linear-gradient(135deg,#7c3aed,#6d28d9)",color:"#fff",fontSize:15,fontWeight:700,cursor:saving?"wait":"pointer",fontFamily:"'Noto Sans Thai',sans-serif",boxShadow:"0 4px 16px rgba(124,58,237,0.3)",marginBottom:20}}>
+            {saving?"⏳ กำลังบันทึกไป Google Sheet...":"💾 บันทึกข้อมูลเดือน "+MONTHS_TH[editMonth]+" ไป Google Sheet"}
           </button>
+          {saveMsg&&(<div style={{background:saveMsg.ok?"rgba(34,197,94,0.1)":"rgba(239,68,68,0.1)",border:`1px solid ${saveMsg.ok?"rgba(34,197,94,0.3)":"rgba(239,68,68,0.3)"}`,borderRadius:12,padding:"12px 16px",display:"flex",alignItems:"center",gap:10,marginBottom:20,animation:"fadeIn 0.3s"}}><span style={{fontSize:18}}>{saveMsg.ok?"✅":"❌"}</span><span style={{color:saveMsg.ok?"#4ade80":"#f87171",fontSize:14,fontWeight:600}}>{saveMsg.text}</span></div>)}
 
-          {saveMsg&&(
-            <div style={{background:"rgba(34,197,94,0.1)",border:"1px solid rgba(34,197,94,0.3)",borderRadius:12,
-              padding:"12px 16px",display:"flex",alignItems:"center",gap:10,marginBottom:20,animation:"fadeIn 0.3s ease"}}>
-              <span style={{fontSize:18}}>✅</span>
-              <span style={{color:"#4ade80",fontSize:14,fontWeight:600}}>บันทึกเดือน {saveMsg} สำเร็จ!</span>
-            </div>
-          )}
-
-          {/* ═══════════ รายการทั้งหมด ═══════════ */}
+          {/* รายการทั้งหมด */}
           <h3 style={{color:"#e2e8f0",fontSize:15,fontWeight:700,marginBottom:12}}>📁 สรุปข้อมูลรายเดือน — ปี {selectedYear}</h3>
           <div style={{display:"flex",flexDirection:"column",gap:6}}>
-            {MONTHS_TH.map((m,i)=>{
-              const d=reportData[selectedYear][m];
-              const hasLink=d.embedUrl&&d.embedUrl.trim()!=="";
-              const hasFile=d.fileName;
-              return(
-                <div key={m} style={{display:"flex",alignItems:"center",gap:8,padding:"10px 14px",borderRadius:10,
-                  background:"rgba(15,23,42,0.5)",border:"1px solid rgba(148,163,184,0.08)",flexWrap:"wrap"}}>
-                  <span style={{fontSize:14}}>{MONTH_ICONS[i]}</span>
-                  <span style={{color:"#cbd5e1",fontSize:13,fontWeight:600,minWidth:50}}>{MONTHS_SHORT[i]}</span>
-
-                  {(hasLink||hasFile)?(
-                    <>
-                      <div style={{flex:1,minWidth:0}}>
-                        {hasLink&&<div style={{color:"#a78bfa",fontSize:11,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>🔗 {d.embedUrl}</div>}
-                        {hasFile&&<div style={{color:"#86efac",fontSize:11}}>📄 {d.fileName} ({d.fileSize})</div>}
-                      </div>
-                      <span style={{fontSize:10,fontWeight:600,padding:"2px 8px",borderRadius:10,background:STATUS_COLORS[d.status].bg,color:STATUS_COLORS[d.status].text,whiteSpace:"nowrap"}}>{STATUS_COLORS[d.status].label}</span>
-                      <button onClick={()=>handleDelete(m)} style={{padding:"4px 10px",borderRadius:6,
-                        border:"1px solid rgba(239,68,68,0.3)",background:"rgba(239,68,68,0.1)",
-                        color:"#f87171",fontSize:11,cursor:"pointer",whiteSpace:"nowrap",
-                        fontFamily:"'Noto Sans Thai', sans-serif"}}>ลบ</button>
-                    </>
-                  ):(
-                    <span style={{fontSize:11,color:"#64748b",fontWeight:500}}>— ยังไม่มีข้อมูล —</span>
-                  )}
-                </div>
-              );
-            })}
+            {MONTHS_TH.map((m,i)=>{const d=reportData[selectedYear][m];const hasLink=d.embedUrl&&d.embedUrl.trim()!=="";const hasFile=d.fileName;return(
+              <div key={m} style={{display:"flex",alignItems:"center",gap:8,padding:"10px 14px",borderRadius:10,background:"rgba(15,23,42,0.5)",border:"1px solid rgba(148,163,184,0.08)",flexWrap:"wrap"}}>
+                <span style={{fontSize:14}}>{MONTH_ICONS[i]}</span>
+                <span style={{color:"#cbd5e1",fontSize:13,fontWeight:600,minWidth:50}}>{MONTHS_SHORT[i]}</span>
+                {(hasLink||hasFile)?(<>
+                  <div style={{flex:1,minWidth:0}}>
+                    {hasLink&&<div style={{color:"#a78bfa",fontSize:11,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>🔗 {d.embedUrl}</div>}
+                    {hasFile&&<div style={{color:"#86efac",fontSize:11}}>📄 {d.fileName} ({d.fileSize})</div>}
+                  </div>
+                  <span style={{fontSize:10,fontWeight:600,padding:"2px 8px",borderRadius:10,background:STATUS_COLORS[d.status].bg,color:STATUS_COLORS[d.status].text,whiteSpace:"nowrap"}}>{STATUS_COLORS[d.status].label}</span>
+                  <button onClick={()=>handleDelete(m)} style={{padding:"4px 10px",borderRadius:6,border:"1px solid rgba(239,68,68,0.3)",background:"rgba(239,68,68,0.1)",color:"#f87171",fontSize:11,cursor:"pointer",whiteSpace:"nowrap",fontFamily:"'Noto Sans Thai',sans-serif"}}>ลบ</button>
+                </>):(<span style={{fontSize:11,color:"#64748b"}}>— ยังไม่มีข้อมูล —</span>)}
+              </div>);})}
           </div>
         </div>
       </div>
@@ -572,209 +421,118 @@ function AdminPanel({visible,onClose,reportData,setReportData,selectedYear}){
   );
 }
 
-// ★★★ แผงจัดการสิทธิ์ — เฉพาะ thian เท่านั้น ★★★
-const DEFAULT_ACCOUNTS={
-  'thanapun.k':{displayName:'Thanapun K.',role:'head',roleLabel:'หัวหน้าฝ่ายประชาสัมพันธ์'},
-  'apinanun.s':{displayName:'Apinanun S.',role:'admin',roleLabel:'ผู้ดูแลระบบ'},
-  'thian':{displayName:'Thianrawich',role:'admin',roleLabel:'ผู้ดูแลระบบ (Super Admin)'}
-};
-
+// ★★★ Permissions Panel (เฉพาะ thian) ★★★
 const ROLE_OPTIONS=[
-  {value:'admin',label:'ผู้ดูแลระบบ (Admin)',desc:'ดูรายงาน + แผงควบคุม + อัปโหลดไฟล์',color:'#60a5fa'},
+  {value:'admin',label:'ผู้ดูแลระบบ (Admin)',desc:'ดูรายงาน + แผงควบคุม + อัปโหลด',color:'#60a5fa'},
   {value:'head',label:'หัวหน้า (Head)',desc:'ดูรายงานได้อย่างเดียว',color:'#e94560'},
   {value:'viewer',label:'ผู้ชม (Viewer)',desc:'ดูรายงานได้อย่างเดียว',color:'#4ade80'}
 ];
 
-function getPermissions(){
-  try{const raw=localStorage.getItem('cc_pr_permissions');return raw?JSON.parse(raw):null;}catch(e){return null;}
-}
-function savePermissions(p){localStorage.setItem('cc_pr_permissions',JSON.stringify(p));}
-
 function PermissionsPanel({visible,onClose}){
-  const [accounts,setAccounts]=useState(()=>getPermissions()||DEFAULT_ACCOUNTS);
-  const [newUsername,setNewUsername]=useState("");
-  const [newDisplay,setNewDisplay]=useState("");
-  const [newRole,setNewRole]=useState("viewer");
-  const [newPassword,setNewPassword]=useState("");
-  const [addMsg,setAddMsg]=useState(null);
+  const[accounts,setAccounts]=useState({});
+  const[loading,setLoading]=useState(true);
+  const[newU,setNewU]=useState("");const[newD,setNewD]=useState("");const[newP,setNewP]=useState("");const[newR,setNewR]=useState("viewer");
+  const[msg,setMsg]=useState(null);
 
-  const handleRoleChange=(username,newR)=>{
-    if(username==='thian')return; // ห้ามเปลี่ยน thian
-    setAccounts(prev=>{
-      const u={...prev};
-      u[username]={...u[username],role:newR,roleLabel:ROLE_OPTIONS.find(r=>r.value===newR)?.label||newR};
-      savePermissions(u);
-      return u;
-    });
-  };
+  useEffect(()=>{if(visible){setLoading(true);api.getPermissions().then(p=>{setAccounts(p||{'thanapun.k':{displayName:'Thanapun K.',role:'head',roleLabel:'หัวหน้าฝ่ายประชาสัมพันธ์',password:'oat44567'},'apinanun.s':{displayName:'Apinanun S.',role:'admin',roleLabel:'ผู้ดูแลระบบ',password:'lib44567'},'thian':{displayName:'Thianrawich',role:'admin',roleLabel:'ผู้ดูแลระบบ (Super Admin)',password:'thian44567'}});setLoading(false);});}},[visible]);
 
-  const handleRemove=(username)=>{
-    if(username==='thian')return;
-    setAccounts(prev=>{
-      const u={...prev};
-      delete u[username];
-      savePermissions(u);
-      return u;
-    });
-  };
+  const save=async(updated)=>{setAccounts(updated);const r=await api.savePermissions(updated);if(r.error)setMsg({ok:false,text:r.error});else setMsg({ok:true,text:"บันทึกสิทธิ์ไป Google Sheet สำเร็จ!"});setTimeout(()=>setMsg(null),3000);};
 
-  const handleAdd=()=>{
-    const un=newUsername.trim().toLowerCase();
-    if(!un||!newDisplay.trim()||!newPassword.trim()){setAddMsg("กรุณากรอกข้อมูลให้ครบ");setTimeout(()=>setAddMsg(null),3000);return;}
-    if(accounts[un]){setAddMsg("ชื่อผู้ใช้นี้มีอยู่แล้ว");setTimeout(()=>setAddMsg(null),3000);return;}
-    setAccounts(prev=>{
-      const u={...prev};
-      u[un]={displayName:newDisplay.trim(),role:newRole,roleLabel:ROLE_OPTIONS.find(r=>r.value===newRole)?.label||newRole,password:newPassword.trim()};
-      savePermissions(u);
-      // อัปเดต accounts ในหน้า login ด้วย
-      localStorage.setItem('cc_pr_custom_accounts',JSON.stringify(u));
-      return u;
-    });
-    setNewUsername("");setNewDisplay("");setNewPassword("");setNewRole("viewer");
-    setAddMsg("เพิ่มผู้ใช้สำเร็จ!");
-    setTimeout(()=>setAddMsg(null),2500);
-  };
+  const handleRole=(u,r)=>{if(u==='thian')return;const up={...accounts};up[u]={...up[u],role:r,roleLabel:ROLE_OPTIONS.find(o=>o.value===r)?.label||r};save(up);};
+  const handleRemove=(u)=>{if(u==='thian')return;const up={...accounts};delete up[u];save(up);};
+  const handleAdd=()=>{const un=newU.trim().toLowerCase();if(!un||!newD.trim()||!newP.trim()){setMsg({ok:false,text:"กรุณากรอกข้อมูลให้ครบ"});setTimeout(()=>setMsg(null),3000);return;}
+    const up={...accounts};up[un]={displayName:newD.trim(),role:newR,roleLabel:ROLE_OPTIONS.find(o=>o.value===newR)?.label||newR,password:newP.trim()};
+    save(up);setNewU("");setNewD("");setNewP("");setNewR("viewer");};
 
   if(!visible)return null;
 
   return(
-    <div style={{position:"fixed",inset:0,zIndex:1100,background:"rgba(0,0,0,0.7)",backdropFilter:"blur(10px)",display:"flex",alignItems:"center",justifyContent:"center",animation:"fadeIn 0.3s ease"}} onClick={onClose}>
-      <div style={{background:"#1e293b",borderRadius:24,width:"90%",maxWidth:640,maxHeight:"90vh",overflow:"auto",border:"1px solid rgba(59,130,246,0.2)",boxShadow:"0 25px 60px rgba(0,0,0,0.6)",animation:"slideUp 0.4s ease"}} onClick={e=>e.stopPropagation()}>
-
-        {/* Header */}
-        <div style={{padding:"24px 28px",borderBottom:"1px solid rgba(148,163,184,0.1)",display:"flex",alignItems:"center",justifyContent:"space-between",background:"rgba(59,130,246,0.05)"}}>
-          <div>
-            <h2 style={{color:"#f8fafc",fontSize:20,fontWeight:700}}>🔐 จัดการสิทธิ์ผู้ใช้</h2>
-            <p style={{color:"#94a3b8",fontSize:13,marginTop:4}}>เฉพาะ Super Admin (thian) เท่านั้น</p>
-          </div>
-          <button onClick={onClose} style={{width:36,height:36,borderRadius:10,border:"1px solid rgba(148,163,184,0.2)",background:"rgba(148,163,184,0.1)",color:"#94a3b8",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+    <div style={{position:"fixed",inset:0,zIndex:1100,background:"rgba(0,0,0,0.7)",backdropFilter:"blur(10px)",display:"flex",alignItems:"center",justifyContent:"center",animation:"fadeIn 0.3s"}} onClick={onClose}>
+      <div style={{background:"#1e293b",borderRadius:24,width:"90%",maxWidth:640,maxHeight:"90vh",overflow:"auto",border:"1px solid rgba(59,130,246,0.2)",boxShadow:"0 25px 60px rgba(0,0,0,0.6)",animation:"slideUp 0.4s"}} onClick={e=>e.stopPropagation()}>
+        <div style={{padding:"24px 28px",borderBottom:"1px solid rgba(148,163,184,0.1)",background:"rgba(59,130,246,0.05)"}}>
+          <h2 style={{color:"#f8fafc",fontSize:20,fontWeight:700}}>🔐 จัดการสิทธิ์ผู้ใช้</h2>
+          <p style={{color:"#94a3b8",fontSize:13,marginTop:4}}>เฉพาะ Super Admin (thian) • บันทึกไป Google Sheet</p>
         </div>
-
         <div style={{padding:"24px 28px"}}>
-
-          {/* รายชื่อผู้ใช้ปัจจุบัน */}
-          <h3 style={{color:"#e2e8f0",fontSize:15,fontWeight:700,marginBottom:14}}>👥 ผู้ใช้ในระบบ</h3>
-          <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:28}}>
-            {Object.entries(accounts).map(([username,acc])=>{
-              const isSelf=username==='thian';
-              const roleOpt=ROLE_OPTIONS.find(r=>r.value===acc.role);
-              return(
-                <div key={username} style={{padding:"14px 16px",borderRadius:12,background:"rgba(15,23,42,0.5)",border:`1px solid ${isSelf?"rgba(59,130,246,0.2)":"rgba(148,163,184,0.08)"}`}}>
-                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
-                    <div>
-                      <span style={{color:"#f8fafc",fontSize:14,fontWeight:700}}>{acc.displayName}</span>
-                      <span style={{color:"#64748b",fontSize:12,marginLeft:8}}>@{username}</span>
-                      {isSelf&&<span style={{color:"#60a5fa",fontSize:10,marginLeft:6,fontWeight:600}}>• ตัวคุณ</span>}
+          {loading?(<div style={{textAlign:"center",padding:"40px 0"}}><div style={{fontSize:36,animation:"spin 1s linear infinite"}}>⟳</div><p style={{color:"#94a3b8",marginTop:12}}>กำลังโหลดจาก Google Sheet...</p></div>):(
+            <>
+              <h3 style={{color:"#e2e8f0",fontSize:15,fontWeight:700,marginBottom:14}}>👥 ผู้ใช้ในระบบ</h3>
+              <div style={{display:"flex",flexDirection:"column",gap:10,marginBottom:28}}>
+                {Object.entries(accounts).map(([username,acc])=>{const isSelf=username==='thian';return(
+                  <div key={username} style={{padding:"14px 16px",borderRadius:12,background:"rgba(15,23,42,0.5)",border:`1px solid ${isSelf?"rgba(59,130,246,0.2)":"rgba(148,163,184,0.08)"}`}}>
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+                      <div><span style={{color:"#f8fafc",fontSize:14,fontWeight:700}}>{acc.displayName}</span><span style={{color:"#64748b",fontSize:12,marginLeft:8}}>@{username}</span>{isSelf&&<span style={{color:"#60a5fa",fontSize:10,marginLeft:6,fontWeight:600}}>• ตัวคุณ</span>}</div>
+                      {!isSelf&&(<button onClick={()=>handleRemove(username)} style={{padding:"4px 12px",borderRadius:6,border:"1px solid rgba(239,68,68,0.3)",background:"rgba(239,68,68,0.1)",color:"#f87171",fontSize:11,cursor:"pointer",fontFamily:"'Noto Sans Thai',sans-serif"}}>ลบ</button>)}
                     </div>
-                    {!isSelf&&(
-                      <button onClick={()=>handleRemove(username)} style={{padding:"4px 12px",borderRadius:6,border:"1px solid rgba(239,68,68,0.3)",background:"rgba(239,68,68,0.1)",color:"#f87171",fontSize:11,cursor:"pointer",fontFamily:"'Noto Sans Thai',sans-serif"}}>ลบผู้ใช้</button>
-                    )}
-                  </div>
-                  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                    {ROLE_OPTIONS.map(r=>(
-                      <button key={r.value} disabled={isSelf} onClick={()=>handleRoleChange(username,r.value)}
-                        style={{flex:1,minWidth:100,padding:"8px 6px",borderRadius:8,fontSize:11,fontWeight:600,cursor:isSelf?"default":"pointer",
-                          border:`1px solid ${acc.role===r.value?r.color+"66":"rgba(148,163,184,0.12)"}`,
-                          background:acc.role===r.value?r.color+"18":"rgba(15,23,42,0.4)",
-                          color:acc.role===r.value?r.color:"#64748b",
-                          opacity:isSelf&&acc.role!==r.value?0.3:1,
-                          fontFamily:"'Noto Sans Thai',sans-serif",transition:"all 0.2s"}}>
-                        {r.label}
-                        <div style={{fontSize:9,fontWeight:400,marginTop:2,opacity:0.7}}>{r.desc}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                    <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{ROLE_OPTIONS.map(r=>(<button key={r.value} disabled={isSelf} onClick={()=>handleRole(username,r.value)} style={{flex:1,minWidth:90,padding:"8px 6px",borderRadius:8,fontSize:11,fontWeight:600,cursor:isSelf?"default":"pointer",border:`1px solid ${acc.role===r.value?r.color+"66":"rgba(148,163,184,0.12)"}`,background:acc.role===r.value?r.color+"18":"rgba(15,23,42,0.4)",color:acc.role===r.value?r.color:"#64748b",opacity:isSelf&&acc.role!==r.value?0.3:1,fontFamily:"'Noto Sans Thai',sans-serif"}}>{r.label}</button>))}</div>
+                  </div>);})}
+              </div>
 
-          {/* เพิ่มผู้ใช้ใหม่ */}
-          <div style={{background:"rgba(15,23,42,0.4)",borderRadius:16,padding:"20px",border:"1px solid rgba(148,163,184,0.08)"}}>
-            <h3 style={{color:"#e2e8f0",fontSize:14,fontWeight:700,marginBottom:14}}>➕ เพิ่มผู้ใช้ใหม่</h3>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
-              <input value={newUsername} onChange={e=>setNewUsername(e.target.value)} placeholder="Username"
-                style={{padding:"10px 14px",borderRadius:8,border:"1px solid rgba(148,163,184,0.2)",background:"rgba(15,23,42,0.6)",color:"#e2e8f0",fontSize:13,outline:"none",fontFamily:"'Noto Sans Thai','Outfit',sans-serif"}} />
-              <input value={newDisplay} onChange={e=>setNewDisplay(e.target.value)} placeholder="ชื่อที่แสดง"
-                style={{padding:"10px 14px",borderRadius:8,border:"1px solid rgba(148,163,184,0.2)",background:"rgba(15,23,42,0.6)",color:"#e2e8f0",fontSize:13,outline:"none",fontFamily:"'Noto Sans Thai','Outfit',sans-serif"}} />
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
-              <input value={newPassword} onChange={e=>setNewPassword(e.target.value)} placeholder="รหัสผ่าน" type="password"
-                style={{padding:"10px 14px",borderRadius:8,border:"1px solid rgba(148,163,184,0.2)",background:"rgba(15,23,42,0.6)",color:"#e2e8f0",fontSize:13,outline:"none",fontFamily:"'Noto Sans Thai','Outfit',sans-serif"}} />
-              <select value={newRole} onChange={e=>setNewRole(e.target.value)}
-                style={{padding:"10px 14px",borderRadius:8,border:"1px solid rgba(148,163,184,0.2)",background:"rgba(15,23,42,0.6)",color:"#e2e8f0",fontSize:13,outline:"none",fontFamily:"'Noto Sans Thai','Outfit',sans-serif"}}>
-                {ROLE_OPTIONS.map(r=>(<option key={r.value} value={r.value}>{r.label}</option>))}
-              </select>
-            </div>
-            <button onClick={handleAdd} style={{width:"100%",padding:"12px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#3b82f6,#2563eb)",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:"'Noto Sans Thai',sans-serif"}}>
-              ➕ เพิ่มผู้ใช้
-            </button>
-            {addMsg&&(
-              <p style={{textAlign:"center",marginTop:10,fontSize:13,fontWeight:600,color:addMsg.includes("สำเร็จ")?"#4ade80":"#f87171",animation:"fadeIn 0.3s ease"}}>{addMsg}</p>
-            )}
-          </div>
+              <div style={{background:"rgba(15,23,42,0.4)",borderRadius:16,padding:"20px",border:"1px solid rgba(148,163,184,0.08)"}}>
+                <h3 style={{color:"#e2e8f0",fontSize:14,fontWeight:700,marginBottom:14}}>➕ เพิ่มผู้ใช้ใหม่</h3>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+                  <input value={newU} onChange={e=>setNewU(e.target.value)} placeholder="Username" style={{padding:"10px 14px",borderRadius:8,border:"1px solid rgba(148,163,184,0.2)",background:"rgba(15,23,42,0.6)",color:"#e2e8f0",fontSize:13,outline:"none"}}/>
+                  <input value={newD} onChange={e=>setNewD(e.target.value)} placeholder="ชื่อที่แสดง" style={{padding:"10px 14px",borderRadius:8,border:"1px solid rgba(148,163,184,0.2)",background:"rgba(15,23,42,0.6)",color:"#e2e8f0",fontSize:13,outline:"none"}}/>
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
+                  <input value={newP} onChange={e=>setNewP(e.target.value)} placeholder="รหัสผ่าน" type="password" style={{padding:"10px 14px",borderRadius:8,border:"1px solid rgba(148,163,184,0.2)",background:"rgba(15,23,42,0.6)",color:"#e2e8f0",fontSize:13,outline:"none"}}/>
+                  <select value={newR} onChange={e=>setNewR(e.target.value)} style={{padding:"10px 14px",borderRadius:8,border:"1px solid rgba(148,163,184,0.2)",background:"rgba(15,23,42,0.6)",color:"#e2e8f0",fontSize:13,outline:"none"}}>{ROLE_OPTIONS.map(r=>(<option key={r.value} value={r.value}>{r.label}</option>))}</select>
+                </div>
+                <button onClick={handleAdd} style={{width:"100%",padding:"12px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#3b82f6,#2563eb)",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:"'Noto Sans Thai',sans-serif"}}>➕ เพิ่มผู้ใช้</button>
+                {msg&&(<p style={{textAlign:"center",marginTop:10,fontSize:13,fontWeight:600,color:msg.ok?"#4ade80":"#f87171",animation:"fadeIn 0.3s"}}>{msg.text}</p>)}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
+// ★★★ Main Dashboard ★★★
 function Dashboard(){
-  const [reportData,setReportData]=useState(loadReportData);
-  const [selectedYear,setSelectedYear]=useState(2568);
-  const [showAdmin,setShowAdmin]=useState(false);
-  const [showPermissions,setShowPermissions]=useState(false);
-  const [currentTime,setCurrentTime]=useState(new Date());
-  const [sessionExpired,setSessionExpired]=useState(false);
-  const [warningCountdown,setWarningCountdown]=useState(null);
+  const[reportData,setReportData]=useState(emptyData);
+  const[selectedYear,setSelectedYear]=useState(2568);
+  const[showAdmin,setShowAdmin]=useState(false);
+  const[showPermissions,setShowPermissions]=useState(false);
+  const[currentTime,setCurrentTime]=useState(new Date());
+  const[sessionExpired,setSessionExpired]=useState(false);
+  const[warningCountdown,setWarningCountdown]=useState(null);
+  const[dataLoading,setDataLoading]=useState(true);
   const user=getUser();
 
-  // ★ บันทึกข้อมูลรายงานทุกครั้งที่เปลี่ยน
-  useEffect(()=>{saveReportData(reportData);},[reportData]);
+  const TIMEOUT_MS=30*60*1000;
+  const WARNING_MS=2*60*1000;
 
-  const TIMEOUT_MS=30*60*1000; // 30 นาที
-  const WARNING_MS=2*60*1000;  // แจ้งเตือนล่วงหน้า 2 นาที
-
-  // ★ ระบบติดตาม activity + หมดเวลาอัตโนมัติ
-  useEffect(()=>{
-    function updateActivity(){
-      localStorage.setItem('cc_pr_lastActivity',Date.now().toString());
-      setWarningCountdown(null); // ซ่อน warning ถ้ามีการใช้งาน
-    }
-    // ติดตามทุกการกระทำของผู้ใช้
-    const events=['mousemove','mousedown','keydown','scroll','touchstart','click'];
-    events.forEach(ev=>window.addEventListener(ev,updateActivity,{passive:true}));
-    updateActivity(); // เซ็ตค่าเริ่มต้น
-
-    // เช็คทุก 10 วินาทีว่าหมดเวลาหรือยัง
-    const checker=setInterval(()=>{
-      const last=parseInt(localStorage.getItem('cc_pr_lastActivity')||'0',10);
-      const elapsed=Date.now()-last;
-      const remaining=TIMEOUT_MS-elapsed;
-
-      if(remaining<=0){
-        // ★ หมดเวลา!
-        clearInterval(checker);
-        localStorage.removeItem('cc_pr_user');
-        localStorage.removeItem('cc_pr_lastActivity');
-        setSessionExpired(true);
-      } else if(remaining<=WARNING_MS&&remaining>0){
-        // ★ แจ้งเตือนก่อนหมดเวลา
-        setWarningCountdown(Math.ceil(remaining/1000));
-      } else {
-        setWarningCountdown(null);
-      }
-    },10000);
-
-    return()=>{
-      events.forEach(ev=>window.removeEventListener(ev,updateActivity));
-      clearInterval(checker);
-    };
+  // ★ โหลดข้อมูลจาก Google Sheet ตอนเปิดหน้า
+  const loadData=useCallback(async()=>{
+    setDataLoading(true);
+    try{
+      const saved=await api.getReports();
+      setReportData(mergeData(saved));
+    }catch(e){console.error("Load error:",e);}
+    finally{setDataLoading(false);}
   },[]);
 
-  // ★ สิทธิ์: admin เท่านั้นที่เข้าแผงควบคุมได้ (apinanun.s, thian)
+  useEffect(()=>{loadData();},[]);
+
+  // Activity timeout
+  useEffect(()=>{
+    function updateActivity(){localStorage.setItem('cc_pr_lastActivity',Date.now().toString());setWarningCountdown(null);}
+    const events=['mousemove','mousedown','keydown','scroll','touchstart','click'];
+    events.forEach(ev=>window.addEventListener(ev,updateActivity,{passive:true}));
+    updateActivity();
+    const checker=setInterval(()=>{
+      const last=parseInt(localStorage.getItem('cc_pr_lastActivity')||'0',10);
+      const remaining=TIMEOUT_MS-(Date.now()-last);
+      if(remaining<=0){clearInterval(checker);localStorage.removeItem('cc_pr_user');localStorage.removeItem('cc_pr_lastActivity');setSessionExpired(true);}
+      else if(remaining<=WARNING_MS)setWarningCountdown(Math.ceil(remaining/1000));
+      else setWarningCountdown(null);
+    },10000);
+    return()=>{events.forEach(ev=>window.removeEventListener(ev,updateActivity));clearInterval(checker);};
+  },[]);
+
   const canAdmin=user&&user.role==="admin";
-  // ★ Super Admin: thian เท่านั้นที่จัดการสิทธิ์ได้
   const isSuperAdmin=user&&user.username==="thian";
 
   useEffect(()=>{const t=setInterval(()=>setCurrentTime(new Date()),1000);return()=>clearInterval(t);},[]);
@@ -782,120 +540,79 @@ function Dashboard(){
   const yearData=reportData[selectedYear];
   const totalWithContent=Object.values(yearData).filter(d=>(d.embedUrl&&d.embedUrl.trim()!=="")||d.fileName).length;
   const totalReported=Object.values(yearData).filter(d=>d.status==="uploaded").length;
-  const totalPending=Object.values(yearData).filter(d=>d.status==="pending").length;
   const totalNotDone=12-totalReported;
 
   const handleLogout=()=>{localStorage.removeItem("cc_pr_user");localStorage.removeItem("cc_pr_lastActivity");window.location.href="index.html";};
 
-  // ★ ถ้า session หมดอายุ — แสดง overlay
   if(sessionExpired){
-    return(
-      <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%)",fontFamily:"'Noto Sans Thai',sans-serif"}}>
-        <div style={{background:"rgba(30,41,59,0.95)",borderRadius:24,padding:"48px 40px",textAlign:"center",maxWidth:460,width:"90%",border:"1px solid rgba(148,163,184,0.15)",boxShadow:"0 25px 60px rgba(0,0,0,0.5)",animation:"fadeUp 0.5s ease"}}>
-          <div style={{fontSize:64,marginBottom:16}}>⏰</div>
-          <h1 style={{color:"#f8fafc",fontSize:22,fontWeight:700,marginBottom:8}}>เซสชันหมดอายุ</h1>
-          <p style={{color:"#94a3b8",fontSize:15,lineHeight:1.7,marginBottom:12}}>ไม่มีการใช้งานเกิน 30 นาที<br/>ระบบได้ออกจากระบบอัตโนมัติเพื่อความปลอดภัย</p>
-          <p style={{color:"#64748b",fontSize:13,marginBottom:28}}>กรุณาเข้าสู่ระบบใหม่อีกครั้ง</p>
-          <a href="index.html" style={{display:"inline-block",padding:"14px 36px",borderRadius:12,background:"linear-gradient(135deg,#7c3aed,#6d28d9)",color:"#fff",textDecoration:"none",fontWeight:600,fontSize:15,boxShadow:"0 4px 20px rgba(124,58,237,0.4)"}}>ไปยังหน้าเข้าสู่ระบบ →</a>
-        </div>
+    return(<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"linear-gradient(135deg,#0f172a,#1e293b,#0f172a)",fontFamily:"'Noto Sans Thai',sans-serif"}}>
+      <div style={{background:"rgba(30,41,59,0.95)",borderRadius:24,padding:"48px 40px",textAlign:"center",maxWidth:460,width:"90%",border:"1px solid rgba(148,163,184,0.15)",animation:"fadeUp 0.5s"}}>
+        <div style={{fontSize:64,marginBottom:16}}>⏰</div>
+        <h1 style={{color:"#f8fafc",fontSize:22,fontWeight:700,marginBottom:8}}>เซสชันหมดอายุ</h1>
+        <p style={{color:"#94a3b8",fontSize:15,lineHeight:1.7,marginBottom:28}}>ไม่มีการใช้งานเกิน 30 นาที</p>
+        <a href="index.html" style={{display:"inline-block",padding:"14px 36px",borderRadius:12,background:"linear-gradient(135deg,#7c3aed,#6d28d9)",color:"#fff",textDecoration:"none",fontWeight:600}}>ไปยังหน้าเข้าสู่ระบบ →</a>
       </div>
-    );
+    </div>);
   }
 
   return(
     <div style={{minHeight:"100vh",fontFamily:"'Noto Sans Thai','Outfit',sans-serif",background:"#0f172a",color:"#f8fafc"}}>
-      <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0,background:"radial-gradient(ellipse 800px 600px at 20% 20%,rgba(124,58,237,0.08) 0%,transparent 60%),radial-gradient(ellipse 600px 400px at 80% 80%,rgba(59,130,246,0.06) 0%,transparent 60%)"}} />
+      <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0,background:"radial-gradient(ellipse 800px 600px at 20% 20%,rgba(124,58,237,0.08) 0%,transparent 60%),radial-gradient(ellipse 600px 400px at 80% 80%,rgba(59,130,246,0.06) 0%,transparent 60%)"}}/>
 
-      {/* Nav */}
       <nav style={{position:"sticky",top:0,zIndex:100,background:"rgba(15,23,42,0.85)",backdropFilter:"blur(20px)",borderBottom:"1px solid rgba(148,163,184,0.08)",padding:"0 24px"}}>
         <div style={{maxWidth:1280,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:64}}>
           <div style={{display:"flex",alignItems:"center",gap:12}}>
             <div style={{width:38,height:38,borderRadius:10,background:"linear-gradient(135deg,#7c3aed,#3b82f6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:800,color:"#fff"}}>PR</div>
-            <div><div style={{fontSize:15,fontWeight:700,color:"#f8fafc",lineHeight:1.2}}>PR CMUL Dashboard</div><div style={{fontSize:11,color:"#64748b",fontWeight:500}}>ระบบสรุปผลการดำเนินการ</div></div>
+            <div><div style={{fontSize:15,fontWeight:700,color:"#f8fafc"}}>PR CMUL Dashboard</div><div style={{fontSize:11,color:"#64748b"}}>ระบบสรุปผลการดำเนินการ</div></div>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
             {user&&(<div style={{textAlign:"right",marginRight:4}}>
               <div style={{color:"#e2e8f0",fontSize:13,fontWeight:600}}>{user.displayName}</div>
-              <div style={{fontSize:10,fontWeight:600,padding:"2px 8px",borderRadius:10,display:"inline-block",
-                background:user.role==="head"?"rgba(233,69,96,0.15)":user.role==="admin"?"rgba(59,130,246,0.15)":"rgba(78,204,163,0.15)",
-                color:user.role==="head"?"#e94560":user.role==="admin"?"#60a5fa":"#4ecca3",
-                border:`1px solid ${user.role==="head"?"rgba(233,69,96,0.3)":user.role==="admin"?"rgba(59,130,246,0.3)":"rgba(78,204,163,0.3)"}`
-              }}>{user.roleLabel}</div>
+              <div style={{fontSize:10,fontWeight:600,padding:"2px 8px",borderRadius:10,display:"inline-block",background:user.role==="head"?"rgba(233,69,96,0.15)":"rgba(59,130,246,0.15)",color:user.role==="head"?"#e94560":"#60a5fa",border:`1px solid ${user.role==="head"?"rgba(233,69,96,0.3)":"rgba(59,130,246,0.3)"}`}}>{user.roleLabel}</div>
             </div>)}
-            <div style={{color:"#64748b",fontSize:12,fontWeight:500,textAlign:"right"}}>
-              <div>{currentTime.toLocaleDateString("th-TH",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div>
-              <div style={{color:"#94a3b8",fontFamily:"Outfit"}}>{currentTime.toLocaleTimeString("th-TH")}</div>
-            </div>
-            {/* ★ ปุ่มแผงควบคุม — แสดงเฉพาะ admin เท่านั้น */}
-            {canAdmin&&(
-              <button onClick={()=>setShowAdmin(true)} style={{padding:"8px 16px",borderRadius:10,border:"1px solid rgba(124,58,237,0.3)",background:"rgba(124,58,237,0.1)",color:"#a78bfa",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"'Noto Sans Thai', sans-serif"}}>⚙️ แผงควบคุม</button>
-            )}
-            {/* ★ ปุ่มจัดการสิทธิ์ — เฉพาะ thian เท่านั้น */}
-            {isSuperAdmin&&(
-              <button onClick={()=>setShowPermissions(true)} style={{padding:"8px 16px",borderRadius:10,border:"1px solid rgba(59,130,246,0.3)",background:"rgba(59,130,246,0.1)",color:"#60a5fa",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"'Noto Sans Thai', sans-serif"}}>🔐 จัดการสิทธิ์</button>
-            )}
-            <button onClick={handleLogout} style={{padding:"8px 16px",borderRadius:10,border:"1px solid rgba(239,68,68,0.3)",background:"rgba(239,68,68,0.08)",color:"#f87171",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"'Noto Sans Thai', sans-serif"}}>🚪 ออกจากระบบ</button>
+            <div style={{color:"#64748b",fontSize:12,textAlign:"right"}}><div>{currentTime.toLocaleDateString("th-TH",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div><div style={{color:"#94a3b8",fontFamily:"Outfit"}}>{currentTime.toLocaleTimeString("th-TH")}</div></div>
+            {canAdmin&&(<button onClick={()=>setShowAdmin(true)} style={{padding:"8px 16px",borderRadius:10,border:"1px solid rgba(124,58,237,0.3)",background:"rgba(124,58,237,0.1)",color:"#a78bfa",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"'Noto Sans Thai',sans-serif"}}>⚙️ แผงควบคุม</button>)}
+            {isSuperAdmin&&(<button onClick={()=>setShowPermissions(true)} style={{padding:"8px 16px",borderRadius:10,border:"1px solid rgba(59,130,246,0.3)",background:"rgba(59,130,246,0.1)",color:"#60a5fa",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"'Noto Sans Thai',sans-serif"}}>🔐 จัดการสิทธิ์</button>)}
+            <button onClick={handleLogout} style={{padding:"8px 16px",borderRadius:10,border:"1px solid rgba(239,68,68,0.3)",background:"rgba(239,68,68,0.08)",color:"#f87171",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"'Noto Sans Thai',sans-serif"}}>🚪 ออก</button>
           </div>
         </div>
       </nav>
 
-      {/* ★ แถบเตือนก่อนหมดเวลา */}
-      {warningCountdown!==null&&(
-        <div style={{position:"sticky",top:64,zIndex:99,background:"rgba(234,179,8,0.15)",borderBottom:"1px solid rgba(234,179,8,0.3)",padding:"10px 24px",display:"flex",alignItems:"center",justifyContent:"center",gap:10,animation:"fadeIn 0.3s ease",backdropFilter:"blur(10px)"}}>
-          <span style={{fontSize:18}}>⚠️</span>
-          <span style={{color:"#fbbf24",fontSize:13,fontWeight:600}}>
-            เซสชันจะหมดอายุใน {Math.floor(warningCountdown/60)} นาที {warningCountdown%60} วินาที — กรุณาขยับเมาส์หรือคลิกเพื่อต่ออายุ
-          </span>
-        </div>
-      )}
+      {warningCountdown!==null&&(<div style={{position:"sticky",top:64,zIndex:99,background:"rgba(234,179,8,0.15)",borderBottom:"1px solid rgba(234,179,8,0.3)",padding:"10px 24px",display:"flex",alignItems:"center",justifyContent:"center",gap:10,animation:"fadeIn 0.3s"}}>
+        <span style={{fontSize:18}}>⚠️</span><span style={{color:"#fbbf24",fontSize:13,fontWeight:600}}>เซสชันจะหมดอายุใน {Math.floor(warningCountdown/60)} นาที {warningCountdown%60} วินาที — ขยับเมาส์เพื่อต่ออายุ</span>
+      </div>)}
 
-      {/* Content */}
       <div style={{maxWidth:1280,margin:"0 auto",padding:"32px 24px",position:"relative",zIndex:1}}>
+        <div style={{marginBottom:32,animation:"fadeUp 0.5s"}}><h1 style={{fontSize:32,fontWeight:900,letterSpacing:-0.5}}>ภาพรวมผลการดำเนินงาน</h1><p style={{color:"#94a3b8",fontSize:15,marginTop:6}}>สรุปรายงานผลการดำเนินการ หน่วยสื่อสารองค์กร สำนักหอสมุด มหาวิทยาลัยเชียงใหม่</p></div>
 
-        <div style={{marginBottom:32,animation:"fadeUp 0.5s ease"}}>
-          <h1 style={{fontSize:32,fontWeight:900,marginBottom:6,letterSpacing:-0.5}}>ภาพรวมผลการดำเนินงาน</h1>
-          <p style={{color:"#94a3b8",fontSize:15}}>สรุปรายงานผลการดำเนินการ หน่วยสื่อสารองค์กร สำนักหอสมุด มหาวิทยาลัยเชียงใหม่</p>
-        </div>
-
-        {/* Year Tabs */}
         <div style={{display:"flex",gap:6,marginBottom:28,background:"rgba(30,41,59,0.5)",borderRadius:14,padding:4,width:"fit-content",border:"1px solid rgba(148,163,184,0.08)"}}>
-          {YEARS.map(y=>(<button key={y} onClick={()=>setSelectedYear(y)} style={{padding:"10px 28px",borderRadius:10,border:"none",background:selectedYear===y?"linear-gradient(135deg,#7c3aed,#6d28d9)":"transparent",color:selectedYear===y?"#fff":"#94a3b8",fontSize:15,fontWeight:selectedYear===y?700:500,cursor:"pointer",transition:"all 0.3s",boxShadow:selectedYear===y?"0 4px 16px rgba(124,58,237,0.3)":"none",fontFamily:"'Noto Sans Thai','Outfit',sans-serif"}}>ปี พ.ศ. {y}</button>))}
+          {YEARS.map(y=>(<button key={y} onClick={()=>setSelectedYear(y)} style={{padding:"10px 28px",borderRadius:10,border:"none",background:selectedYear===y?"linear-gradient(135deg,#7c3aed,#6d28d9)":"transparent",color:selectedYear===y?"#fff":"#94a3b8",fontSize:15,fontWeight:selectedYear===y?700:500,cursor:"pointer",boxShadow:selectedYear===y?"0 4px 16px rgba(124,58,237,0.3)":"none",fontFamily:"'Noto Sans Thai','Outfit',sans-serif"}}>ปี พ.ศ. {y}</button>))}
         </div>
 
-        {/* ★ Stats Row — เปลี่ยนข้อความตามคำสั่ง */}
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))",gap:16,marginBottom:32}}>
-          <StatCard icon="📊" label="จำนวนรายงานแล้วทั้งหมด (เดือน)" value={totalReported} color="#7c3aed" delay={0.1} />
-          <StatCard icon="✅" label="จำนวนรายงานที่ได้ดำเนินการแล้ว" value={totalReported} color="#22c55e" delay={0.15} />
-          <StatCard icon="📁" label="จำนวนไฟล์ทั้งหมดในปีนี้" value={`${totalWithContent}/12`} color="#3b82f6" delay={0.2} />
-          <StatCard icon="⏳" label="จำนวนรายงานที่ยังไม่ได้ดำเนินการ" value={totalNotDone} color="#eab308" delay={0.25} />
-        </div>
+        {dataLoading?(
+          <div style={{textAlign:"center",padding:"60px 0"}}><div style={{fontSize:48,animation:"spin 1s linear infinite",marginBottom:16}}>⟳</div><p style={{color:"#94a3b8",fontSize:16}}>กำลังโหลดข้อมูลจาก Google Sheet...</p></div>
+        ):(
+          <>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:16,marginBottom:32}}>
+              <StatCard icon="📊" label="จำนวนรายงานแล้วทั้งหมด (เดือน)" value={totalReported} color="#7c3aed" delay={0.1}/>
+              <StatCard icon="✅" label="จำนวนรายงานที่ได้ดำเนินการแล้ว" value={totalReported} color="#22c55e" delay={0.15}/>
+              <StatCard icon="📁" label="จำนวนไฟล์ทั้งหมดในปีนี้" value={`${totalWithContent}/12`} color="#3b82f6" delay={0.2}/>
+              <StatCard icon="⏳" label="จำนวนรายงานที่ยังไม่ได้ดำเนินการ" value={totalNotDone} color="#eab308" delay={0.25}/>
+            </div>
 
-        {/* ★ Progress Bar — ยังคงไว้ */}
-        <div style={{background:"rgba(30,41,59,0.7)",borderRadius:16,padding:"20px 24px",marginBottom:32,border:"1px solid rgba(148,163,184,0.1)",animation:"fadeUp 0.5s ease 0.35s both"}}>
-          <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
-            <span style={{color:"#e2e8f0",fontSize:14,fontWeight:600}}>ความคืบหน้าการรายงานผล ปี {selectedYear}</span>
-            <span style={{color:"#a78bfa",fontSize:14,fontWeight:700}}>{Math.round((totalReported/12)*100)}%</span>
-          </div>
-          <div style={{height:10,borderRadius:5,background:"rgba(15,23,42,0.6)",overflow:"hidden"}}>
-            <div style={{height:"100%",borderRadius:5,background:"linear-gradient(90deg,#7c3aed,#3b82f6)",width:`${(totalReported/12)*100}%`,transition:"width 0.8s ease",boxShadow:"0 0 12px rgba(124,58,237,0.4)"}} />
-          </div>
-        </div>
+            <div style={{background:"rgba(30,41,59,0.7)",borderRadius:16,padding:"20px 24px",marginBottom:32,border:"1px solid rgba(148,163,184,0.1)",animation:"fadeUp 0.5s ease 0.35s both"}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}><span style={{color:"#e2e8f0",fontSize:14,fontWeight:600}}>ความคืบหน้าการรายงานผล ปี {selectedYear}</span><span style={{color:"#a78bfa",fontSize:14,fontWeight:700}}>{Math.round((totalReported/12)*100)}%</span></div>
+              <div style={{height:10,borderRadius:5,background:"rgba(15,23,42,0.6)",overflow:"hidden"}}><div style={{height:"100%",borderRadius:5,background:"linear-gradient(90deg,#7c3aed,#3b82f6)",width:`${(totalReported/12)*100}%`,transition:"width 0.8s",boxShadow:"0 0 12px rgba(124,58,237,0.4)"}}/></div>
+            </div>
 
-        {/* Section heading */}
-        <div style={{marginBottom:20,display:"flex",alignItems:"center",gap:10,animation:"fadeUp 0.5s ease 0.4s both"}}>
-          <h2 style={{fontSize:20,fontWeight:800,color:"#f8fafc"}}>📋 รายงานรายเดือน</h2>
-          <div style={{flex:1,height:1,background:"rgba(148,163,184,0.1)"}} />
-        </div>
+            <div style={{marginBottom:20,display:"flex",alignItems:"center",gap:10}}><h2 style={{fontSize:20,fontWeight:800}}>📋 รายงานรายเดือน</h2><div style={{flex:1,height:1,background:"rgba(148,163,184,0.1)"}}/></div>
 
-        {/* ★ Month Grid — แสดง Link Card + ปุ่มฉบับเต็ม */}
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(300px, 1fr))",gap:16,marginBottom:40}}>
-          {MONTHS_TH.map((month,i)=>(
-            <MonthCard key={`${selectedYear}-${month}`} month={month} index={i}
-              data={yearData[month]} onOpenAdmin={()=>setShowAdmin(true)} canAdmin={canAdmin} />
-          ))}
-        </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:16,marginBottom:40}}>
+              {MONTHS_TH.map((month,i)=>(<MonthCard key={`${selectedYear}-${month}`} month={month} index={i} data={yearData[month]} onOpenAdmin={()=>setShowAdmin(true)} canAdmin={canAdmin}/>))}
+            </div>
+          </>
+        )}
 
-        {/* ★ Footer — เปลี่ยนข้อความ */}
         <div style={{textAlign:"center",padding:"24px 0",borderTop:"1px solid rgba(148,163,184,0.08)",color:"#475569",fontSize:12}}>
           <p style={{fontWeight:600,color:"#94a3b8"}}>หน่วยสื่อสารองค์กร สำนักหอสมุด มหาวิทยาลัยเชียงใหม่</p>
           <p style={{marginTop:4}}>PR CMUL Dashboard V.10</p>
@@ -904,21 +621,13 @@ function Dashboard(){
         </div>
       </div>
 
-      {/* Admin Panel — เฉพาะ admin */}
-      {canAdmin&&(
-        <AdminPanel visible={showAdmin} onClose={()=>setShowAdmin(false)}
-          reportData={reportData} setReportData={setReportData} selectedYear={selectedYear} />
-      )}
-
-      {/* ★ Permissions Panel — เฉพาะ thian */}
-      {isSuperAdmin&&(
-        <PermissionsPanel visible={showPermissions} onClose={()=>setShowPermissions(false)} />
-      )}
+      {canAdmin&&(<AdminPanel visible={showAdmin} onClose={()=>setShowAdmin(false)} reportData={reportData} setReportData={setReportData} selectedYear={selectedYear} onRefresh={loadData}/>)}
+      {isSuperAdmin&&(<PermissionsPanel visible={showPermissions} onClose={()=>setShowPermissions(false)}/>)}
     </div>
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<Dashboard />);
+ReactDOM.createRoot(document.getElementById("root")).render(<Dashboard/>);
 </script>
 </body>
 </html>
