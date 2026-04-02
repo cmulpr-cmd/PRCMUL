@@ -1,6 +1,56 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+  <script>
+(function() {
+  // 1. บล็อคการคลิกขวา
+  document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+  });
+
+  // 2. บล็อคปุ่มลัดที่ใช้เปิด DevTools (F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U)
+  document.addEventListener('keydown', function(e) {
+    // F12
+    if (e.key === 'F12' || e.keyCode === 123) {
+      e.preventDefault();
+      return false;
+    }
+    // Ctrl+Shift+I หรือ Mac (Cmd+Option+I)
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) {
+      e.preventDefault();
+      return false;
+    }
+    // Ctrl+Shift+J หรือ Mac (Cmd+Option+J)
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) {
+      e.preventDefault();
+      return false;
+    }
+    // Ctrl+U (View Source)
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) {
+      e.preventDefault();
+      return false;
+    }
+  });
+
+  // 3. วางกับดัก Debugger Loop 
+  // หากมีการเปิด DevTools ทิ้งไว้ คำสั่ง debugger จะทำงานและทำให้สคริปต์หยุดชะงัก
+  // เราจะเช็คเวลาที่หายไป ถ้าหยุดชะงักนานผิดปกติ แปลว่าโดนแอบดูโค้ด ให้เตะออกทันที
+  if (!window.__AUTH_BLOCKED__) {
+    setInterval(function() {
+      var before = new Date().getTime();
+      // คำสั่งนี้จะหยุดการทำงานของเว็บทันทีที่มีคนเปิดหน้าต่าง DevTools
+      debugger; 
+      var after = new Date().getTime();
+      
+      // ถ้าเวลาห่างกันเกิน 100ms แปลว่าติด Debugger (เปิด DevTools อยู่)
+      if (after - before > 100) {
+        document.body.innerHTML = ''; // ล้างหน้าจอทิ้ง
+        window.location.replace("../../index.html"); // ดีดกลับหน้าล็อคอิน
+      }
+    }, 1000); // เช็คทุกๆ 1 วินาที
+  }
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CC&PR CMUL — เข้าสู่ระบบ</title>
