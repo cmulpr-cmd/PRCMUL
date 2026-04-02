@@ -6,11 +6,17 @@
   // 1. บล็อคการคลิกขวา
   document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
+  let captureTriggered = false;
+
   // ฟังก์ชันควบคุมการเบลอหน้าจอ
   function lockScreen() { document.body.classList.add('screenshot-blurred'); }
-  function unlockScreen() { document.body.classList.remove('screenshot-blurred'); }
+  function unlockScreen() { 
+    if (!captureTriggered) {
+      document.body.classList.remove('screenshot-blurred'); 
+    }
+  }
 
-  // 2. บล็อคปุ่มลัดต่างๆ และดักการกดปริ้น / แคปจอ
+  // 2. ดักปุ่มลัดต่างๆ และดักการแคปหน้าจอ
   document.addEventListener('keydown', function(e) {
     if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) { e.preventDefault(); return false; }
@@ -19,46 +25,52 @@
     
     // 🖨️ ดักจับการกดปุ่มสั่งปริ้น (Ctrl+P หรือ Cmd+P)
     if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P' || e.keyCode === 80)) {
-      e.preventDefault();
+      e.preventDefault(); 
       alert("🔒 ระบบความปลอดภัย: ไม่อนุญาตให้พิมพ์หรือบันทึกหน้าจอนี้ครับ\nเราจะส่งแจ้งเตือนความปลอดภัยดังกล่าวให้คุณเธียรวิชญ์ทราบ");
       sendAlertEmail();
       return false;
     }
 
-    // 🚀 เบลอล่วงหน้าทันทีที่กดปุ่ม Windows (Meta), Command (Mac) หรือ PrintScreen 
-    // เพื่อให้จอเบลอเสร็จ "ก่อน" ที่ระบบปฏิบัติการจะถ่ายรูป
-    if (e.key === 'Meta' || e.key === 'OS' || e.key === 'PrintScreen' || e.keyCode === 44) {
+    // 🚀 3.1 ท่าไม้ตาย: ดักกด Start (Meta) + Shift ค้างไว้ ให้เบลอรอเลย (ก่อนที่จะกด S ทัน) 
+    // โดยที่ถ้ากด Start ตัวเดียวจะยังไม่เบลอ
+    if (e.metaKey && e.shiftKey) {
       lockScreen();
     }
 
-    // ดักคีย์ลัดถ่ายภาพเต็มรูปแบบ (Win+Shift+S, Cmd+Shift+3/4/5)
+    // 📸 3.2 ดักจับการยืนยันการแคปจอ (Win+Shift+S, Cmd+Shift+3/4/5 หรือกด PrintScreen เพียวๆ ทันที)
     if (
       e.key === 'PrintScreen' || e.keyCode === 44 || 
       (e.metaKey && e.shiftKey && (e.key === 's' || e.key === 'S')) || 
       (e.metaKey && e.shiftKey && ['3','4','5'].includes(e.key))
     ) {
       e.preventDefault();
+      captureTriggered = true; // ล็อคสถานะไว้ไม่ให้ปุ่มอื่นมาปลดเบลอ
       lockScreen();
       
-      // ล้างคลิปบอร์ด ป้องกันแคปติด
+      // ล้างคลิปบอร์ด ป้องกันการแคปติดไป
       if(navigator.clipboard) {
          navigator.clipboard.writeText("🔒 ไม่อนุญาตให้แคปหน้าจอจากระบบ PR CMUL").catch(err => {});
       }
 
       alert("🔒 ระบบความปลอดภัย: ไม่อนุญาตให้แคปหน้าจอหรือบันทึกภาพครับ\nเราจะส่งแจ้งเตือนให้คุณเธียรวิชญ์ทราบ");
       sendAlertEmail();
-      setTimeout(unlockScreen, 3000); // คลายเบลอใน 3 วิ
+      
+      // คลายเบลอหลังจากแจ้งเตือน 3 วินาที
+      setTimeout(() => {
+        captureTriggered = false;
+        unlockScreen();
+      }, 3000);
     }
   });
 
-  // ปลดเบลอเมื่อปล่อยปุ่ม Windows / Command (ยกเลิกการแคป)
+  // ปลดเบลอเมื่อปล่อยปุ่ม Shift หรือ Start (ถ้าเปลี่ยนใจไม่แคปแล้ว)
   document.addEventListener('keyup', function(e) {
-    if (e.key === 'Meta' || e.key === 'OS' || e.key === 'PrintScreen' || e.keyCode === 44) {
+    if (e.key === 'Shift' || e.key === 'Meta' || e.key === 'OS' || e.key === 'PrintScreen' || e.keyCode === 44) {
       unlockScreen();
     }
   });
 
-  // 3. วางกับดัก Debugger Loop
+  // 4. วางกับดัก Debugger Loop
   if (!window.__AUTH_BLOCKED__) {
     setInterval(function() {
       var before = new Date().getTime();
@@ -99,14 +111,14 @@ function sendAlertEmail() {
   }
 
   /* =========================================
-     CSS เบลอหน้าต่าง (ดักแคปหน้าจอ) ทำงาน "ทันที" ไม่มีดีเลย์
+     CSS สำหรับหน้าต่างเบลอเมื่อโดนแคปหน้าจอ (ทำงานทันที)
      ========================================= */
   body.screenshot-blurred #root,
   body.screenshot-blurred .bg-scene {
     filter: blur(30px) grayscale(50%) !important;
     pointer-events: none !important;
     user-select: none !important;
-    transition: none !important; /* บังคับไม่มีอนิเมชั่นดีเลย์เพื่อให้ทันระบบปฏิบัติการ */
+    transition: none !important; /* ไม่มีดีเลย์ เพื่อหนีระบบปฏิบัติการให้ทัน */
   }
   .anti-screenshot-msg {
     position: fixed; inset: 0; z-index: 999999;
