@@ -33,6 +33,7 @@
   } catch(e) {}
 
   if(!allowed) {
+    window.__AUTH_BLOCKED__ = true; // ตัวแปรบอกให้สคริปต์ด้านล่างรู้ว่าถูกบล็อค
     // 1. ซ่อนเนื้อหาเพจทันทีก่อนที่เบราว์เซอร์จะวาดกราฟ (ป้องกันการแอบเห็นข้อมูล)
     document.write('<style>html { display: none !important; }</style>');
     
@@ -162,6 +163,14 @@
     -webkit-text-fill-color: transparent;
     text-align: right;
   }
+
+  /* USER ACTIONS (สไตล์โปรไฟล์ผู้ใช้มุมขวา) */
+  .user-actions { display: flex; align-items: center; gap: 12px; }
+  .user-info { text-align: right; }
+  .user-name { color: var(--navy); font-size: 14px; font-weight: 800; line-height: 1.2; margin-bottom: 2px;}
+  .user-role { font-size: 11px; color: var(--gray-500); font-weight: 500;}
+  .btn-logout { padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; border:none; background: rgba(239,68,68,0.1); color: #ef4444; font-family: 'Noto Sans Thai', sans-serif; transition: 0.2s; }
+  .btn-logout:hover { background: rgba(239,68,68,0.15); transform: translateY(-1px); }
 
   /* Header กล่องใหญ่ด้านบน */
   .report-header {
@@ -335,8 +344,18 @@
 <div class="report-container">
 
 <nav class="back-bar">
-  <a href="../../dashboard.html" class="back-btn">← กลับหน้าหลัก</a>
-  <span class="back-bar-title">หน่วยสื่อสารองค์กร<br>สำนักหอสมุด</span>
+  <div style="display: flex; align-items: center; gap: 16px;">
+    <a href="../dashboard.html" class="back-btn">← กลับหน้าหลัก</a>
+    <span class="back-bar-title" style="text-align: left;">หน่วยสื่อสารองค์กร<br>สำนักหอสมุด</span>
+  </div>
+  
+  <div class="user-actions" id="userActionsDisplay" style="display: none;">
+    <div class="user-info">
+      <div class="user-name" id="displayUserName">ผู้ปฏิบัติงาน</div>
+      <div class="user-role" id="displayUserRole">หน่วยสื่อสารองค์กร</div>
+    </div>
+    <button class="btn-logout" onclick="handleLogout()">ออกจากระบบ</button>
+  </div>
 </nav>
 
 <div class="report-header">
@@ -574,6 +593,30 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+// โหลดข้อมูลผู้ใช้มาแสดงบนแถบเมนูด้านบน
+document.addEventListener('DOMContentLoaded', function() {
+  if(window.__AUTH_BLOCKED__) return; // ถ้าโดนบล็อคจากด้านบน จะไม่รันส่วนนี้
+  
+  try {
+    const rawUser = localStorage.getItem('cc_pr_user');
+    if (rawUser) {
+      const user = JSON.parse(rawUser);
+      document.getElementById('displayUserName').textContent = user.displayName;
+      document.getElementById('displayUserRole').textContent = user.roleLabel || user.role;
+      document.getElementById('userActionsDisplay').style.display = 'flex'; // แสดงกล่องข้อมูล
+    }
+  } catch(e) {
+    console.error("Error loading user info", e);
+  }
+});
+
+// ฟังก์ชันคลิกออกจากระบบ
+function handleLogout() {
+  localStorage.removeItem("cc_pr_user");
+  localStorage.removeItem("cc_pr_lastActivity");
+  window.location.href = "../index.html"; // เปลี่ยนให้ตรงกับ path ของหน้า Login
+}
 </script>
 </body>
 </html>
