@@ -28,15 +28,12 @@
     }
   } catch(e) {}
 
-// หากไม่ได้ล็อกอิน ให้เขียนทับทั้งหน้าจอทันที (ทำลายแท็ก head และ body เดิมทิ้ง)
+// หากไม่ได้ล็อกอิน ให้เขียนทับทั้งหน้าจอทันที
   if (!allowed) {
     window.__AUTH_BLOCKED__ = true;
     
-    // แทนที่จะรอ DOMContentLoaded เราสั่งลบและสร้าง HTML ใหม่ทับเดี๋ยวนั้นเลย
-    document.open();
-    document.write(`
-      <!DOCTYPE html>
-      <html>
+    // 1. ล้างแท็กและโครงสร้างหน้าเว็บทั้งหมดทิ้ง แล้วเขียนหน้า Access Denied ทับ
+    document.documentElement.innerHTML = `
       <head>
         <title>Access Denied</title>
         <meta charset="UTF-8">
@@ -46,12 +43,13 @@
           <div style="font-size: 48px; margin-bottom: 12px;">🔒</div>
           <h1 style="font-size:28px;font-weight:900;margin-bottom:12px;color:#ef4444;">Access Denied</h1>
           <p style="color:#475569;font-size:15px;line-height:1.6;margin-bottom:28px;font-weight:500;">หากท่านเป็นผู้ปฏิบัติงาน "หน่วยสื่อสารองค์กร"<br>กรุณาเข้าสู่ระบบก่อนใช้งาน</p>
-          <a href="../../index.html" style="display:inline-block;padding:12px 36px;border-radius:12px;background:linear-gradient(135deg, #7c3aed, #2563eb);color:#fff;text-decoration:none;font-weight:700;font-size:15px;box-shadow:0 8px 20px rgba(124,58,237,0.25); transition:transform 0.2s;">กลับไปหน้าเข้าสู่ระบบ</a>
+          <a href="../../index.html" style="display:inline-block;padding:12px 36px;border-radius:12px;background:#2563eb;color:#fff;text-decoration:none;font-weight:700;font-size:15px;">กลับไปหน้าเข้าสู่ระบบ</a>
         </div>
       </body>
-      </html>
-    `);
-    document.close();
+    `;
+    
+    // 2. คำสั่งเวทมนตร์: ตัดจบ! บังคับเบราว์เซอร์ให้ "หยุดดาวน์โหลดและหยุดอ่านโค้ดส่วนที่เหลือ" ทันที
+    window.stop();
   }
 
   // ==========================================
