@@ -183,6 +183,18 @@ function sendAlertEmail() {
   @keyframes popIn { 0% { transform: scale(0); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
   .check-circle svg { width: 40px; height: 40px; fill: white; }
 
+  /* --- โค้ดที่เพิ่มใหม่สำหรับรูปโปรไฟล์ --- */
+  .profile-img {
+    width: 80px; height: 80px; 
+    border-radius: 50%; object-fit: cover;
+    border: 3px solid var(--primary);
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.25);
+    display: none; 
+    margin: 0 auto;
+    animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background-color: white;
+  }
+
   .welcome-h2 { font-size: 1.2rem; font-weight: 500; color: var(--text-muted); margin-top: 10px; line-height: 1.4; transition: 0.3s; }
   .welcome-name { font-size: 1.7rem; font-weight: 700; color: var(--primary); display: block; margin-top: 8px; letter-spacing: -0.5px;}
   
@@ -205,7 +217,7 @@ function sendAlertEmail() {
   .login-btn.loading .btn-text { display: none; }
   .login-btn.loading .spinner { display: block; }
 
-  /* ป้องกันการปริ้นผ่านเมนูเบราว์เซอร์ (กระดาษจะออกมาเป็นหน้าว่างพร้อมข้อความเตือน) */
+  /* ป้องกันการปริ้นผ่านเมนูเบราว์เซอร์ */
   @media print {
     body * { visibility: hidden !important; display: none !important; }
     body::before {
@@ -271,6 +283,8 @@ function sendAlertEmail() {
       <div class="check-circle" id="authCheck">
         <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
       </div>
+      
+      <img src="" alt="Profile" class="profile-img" id="profileImg">
     </div>
     
     <h2 class="welcome-h2" id="welcomeText">กำลังเข้าสู่ระบบ...</h2>
@@ -334,6 +348,7 @@ function sendAlertEmail() {
     if (acc && acc.password === pass) {
         document.getElementById('authSpinner').style.display = 'block';
         document.getElementById('authCheck').style.display = 'none';
+        document.getElementById('profileImg').style.display = 'none'; // ซ่อนรูปภาพระหว่างโหลด
         document.getElementById('welcomeText').innerHTML = 'กำลังตรวจสอบข้อมูล<br>และเตรียมระบบ...';
         document.getElementById('roleBadge').style.display = 'none';
         document.getElementById('goBtn').style.display = 'none';
@@ -352,7 +367,28 @@ function sendAlertEmail() {
           localStorage.setItem('cc_pr_lastActivity', Date.now().toString());
 
           document.getElementById('authSpinner').style.display = 'none';
-          document.getElementById('authCheck').style.display = 'flex';
+
+          // --- ส่วนจัดการการแสดงผลรูปโปรไฟล์ ---
+          const userImages = {
+            'thanapun.k': 'thanapun.jpg',
+            'apinanun.s': 'apinanun.jpg',
+            'thian': 'thianrawich.png',
+            'chamaiporn.k': 'chamaiporn.jpg'
+          };
+
+          const profileImg = document.getElementById('profileImg');
+          const authCheck = document.getElementById('authCheck');
+
+          if (userImages[user]) {
+             profileImg.src = userImages[user];
+             profileImg.style.display = 'block';
+             authCheck.style.display = 'none';
+          } else {
+             profileImg.style.display = 'none';
+             authCheck.style.display = 'flex';
+          }
+          // ----------------------------------------
+
           document.getElementById('welcomeText').innerHTML = 'ยินดีต้อนรับ<br><span class="welcome-name">' + acc.displayName + '</span>';
           
           const badge = document.getElementById('roleBadge');
