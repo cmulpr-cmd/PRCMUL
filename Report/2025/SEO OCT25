@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<style id="page-hider">
+  /* ซ่อนเนื้อหาทั้งหมดไว้ก่อน จนกว่าจะตรวจสอบสิทธิ์เสร็จ (แก้ปัญหาจอขาว) */
+  body { opacity: 0; visibility: hidden; background: #f3f5f9; }
+</style>
+<script>
+(function(){
+  var allowed = false;
+  var TIMEOUT_MS = 30 * 60 * 1000; // ตั้งค่าหมดอายุการใช้งาน 30 นาที
+  var loginPageUrl = "../../index.html"; // ถอย 2 โฟลเดอร์กลับไปหน้า Login
+
+  try {
+    var raw = localStorage.getItem('cc_pr_user');
+    if(raw) {
+      var user = JSON.parse(raw);
+      if(user.username && user.displayName && user.role && user.loggedInAt) {
+        // เช็คว่าล็อคอินมาเกิน 24 ชม. หรือยัง
+        if(Date.now() - new Date(user.loggedInAt).getTime() < 24 * 60 * 60 * 1000) {
+          var lastAct = localStorage.getItem('cc_pr_lastActivity');
+          // เช็ค Inactivity Timeout
+          if(lastAct && (Date.now() - parseInt(lastAct, 10)) > TIMEOUT_MS) {
+            localStorage.removeItem('cc_pr_user');
+            localStorage.removeItem('cc_pr_lastActivity');
+          } else {
+            localStorage.setItem('cc_pr_lastActivity', Date.now().toString());
+            allowed = true;
+          }
+        } else {
+          localStorage.removeItem('cc_pr_user');
+          localStorage.removeItem('cc_pr_lastActivity');
+        }
+      }
+    }
+  } catch(e) {}
+
+  if(!allowed) {
+    window.__AUTH_BLOCKED__ = true;
+    document.addEventListener('DOMContentLoaded', function(){
+      // ล้างเนื้อหากราฟทิ้ง แล้วใส่หน้า Access Denied
+      document.body.innerHTML = 
+        '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f3f5f9;font-family:\'Noto Sans Thai\',sans-serif;margin:0;"><div style="background:#fff;border-radius:24px;padding:48px 40px;text-align:center;max-width:440px;width:90%;box-shadow:0 25px 60px rgba(0,0,0,0.05); border-top: 5px solid #ef4444;"><div style="font-size: 48px; margin-bottom: 12px;">🔒</div><h1 style="font-size:28px;font-weight:900;margin-bottom:12px;background:linear-gradient(135deg, #ef4444, #991b1b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:inline-block;">Access Denied</h1><p style="color:#475569;font-size:15px;line-height:1.6;margin-bottom:28px;font-weight:500;">หากท่านเป็นผู้ปฏิบัติงาน "หน่วยสื่อสารองค์กร"<br>กรุณาเข้าสู่ระบบก่อนใช้งาน</p><a href="' + loginPageUrl + '" style="display:inline-block;padding:12px 36px;border-radius:12px;background:linear-gradient(135deg, #7c3aed, #2563eb);color:#fff;text-decoration:none;font-weight:700;font-size:15px;box-shadow:0 8px 20px rgba(124,58,237,0.25); transition:transform 0.2s;">เข้าสู่ระบบ</a></div></div>';
+      
+      // แสดงผลหน้าจอ
+      document.body.style.opacity = '1';
+      document.body.style.visibility = 'visible';
+    });
+  } else {
+    // อนุญาตให้เข้าถึงได้
+    document.addEventListener('DOMContentLoaded', function(){
+      // ปลดล็อคการซ่อนหน้าเว็บ
+      var hider = document.getElementById('page-hider');
+      if(hider) hider.remove();
+      document.body.style.opacity = '1';
+      document.body.style.visibility = 'visible';
+    });
+
+    function updateActivity(){ localStorage.setItem('cc_pr_lastActivity', Date.now().toString()); }
+    const events = ['mousemove','mousedown','keydown','scroll','touchstart','click'];
+    events.forEach(ev => window.addEventListener(ev, updateActivity, { passive: true }));
+    
+    const checker = setInterval(() => {
+      const last = parseInt(localStorage.getItem('cc_pr_lastActivity') || '0', 10);
+      if (Date.now() - last > TIMEOUT_MS) {
+        clearInterval(checker);
+        localStorage.removeItem('cc_pr_user');
+        localStorage.removeItem('cc_pr_lastActivity');
+        window.location.href = loginPageUrl;
+      }
+    }, 10000);
+  }
+})();
+</script>
+
+<script>
+(function() {
+  // บล็อคการคลิกขวา
+  document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+  // บล็อคปุ่มลัด
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) { e.preventDefault(); return false; }
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) { e.preventDefault(); return false; }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) { e.preventDefault(); return false; }
+  });
+
+  // Debugger Loop
+  if (!window.__AUTH_BLOCKED__) {
+    setInterval(function() {
+      var before = new Date().getTime();
+      debugger; 
+      var after = new Date().getTime();
+      if (after - before > 100) {
+        document.body.innerHTML = ''; 
+        window.location.replace("../../index.html"); 
+      }
+    }, 1000);
+  }
+})();
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMUL Facebook Page Report - ตุลาคม 2568</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap');
+  :root{--navy:#1B2A4A;--navy-light:#2C3E6B;--blue:#3B82F6;--blue-light:#60A5FA;--cyan:#06B6D4;--teal:#14B8A6;--green:#22C55E;--green-dark:#16A34A;--red:#EF4444;--red-light:#FCA5A5;--orange:#F97316;--yellow:#EAB308;--purple:#8B5CF6;--pink:#EC4899;--gray-50:#F8FAFC;--gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-300:#CBD5E1;--gray-400:#94A3B8;--gray-500:#64748B;--gray-600:#475569;--gray-700:#334155;--gray-800:#1E293B;--white:#FFFFFF;--shadow-sm:0 1px 2px rgba(0,0,0,0.05);--shadow:0 1px 3px rgba(0,0,0,0.1),0 1px 2px rgba(0,0,0,0.06);--shadow-lg:0 10px 15px rgba(0,0,0,0.1),0 4px 6px rgba(0,0,0,0.05)}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'IBM Plex Sans Thai','Noto Sans Thai',sans-serif;background:var(--gray-100);color:var(--gray-800);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .report-container{max-width:1200px;margin:0 auto;padding:24px}
+  
+  /* =========================================
+     แถบเมนูกลับหน้าหลัก (Glassmorphism - ธีมสีม่วงตุลาคม)
+     ========================================= */
+  .back-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    margin: -24px -24px 24px -24px; padding: 16px 32px;
+    border-bottom: 1px solid rgba(255,255,255,0.6);
+    display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  }
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #fff; color: var(--purple); padding: 10px 20px;
+    border-radius: 12px; text-decoration: none; font-size: 14px; font-weight: 700;
+    transition: all 0.3s ease; border: 1px solid var(--purple); box-shadow: 0 2px 8px rgba(139, 92, 246, 0.08);
+  }
+  .back-btn:hover { background: linear-gradient(135deg, var(--purple), #7c3aed); color: white; transform: translateY(-2px); box-shadow: 0 8px 15px rgba(139, 92, 246, 0.25); border-color: transparent;}
+  .back-bar-title { font-size: 14px; font-weight: 800; background: linear-gradient(135deg, var(--navy), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: right; }
+
+  /* USER ACTIONS */
+  .user-actions { display: flex; align-items: center; gap: 12px; }
+  .user-info { text-align: right; }
+  .user-name { color: var(--navy); font-size: 14px; font-weight: 800; line-height: 1.2; margin-bottom: 2px;}
+  .user-role { font-size: 11px; color: var(--gray-500); font-weight: 500;}
+  .btn-logout { padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; border:none; background: rgba(239,68,68,0.1); color: #ef4444; font-family: 'Noto Sans Thai', sans-serif; transition: 0.2s; }
+  .btn-logout:hover { background: rgba(239,68,68,0.15); transform: translateY(-1px); }
+
+  .report-header{background:linear-gradient(135deg,#1A1A2E 0%,#16213E 35%,#0F3460 70%,#533483 100%);border-radius:16px;padding:32px 40px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow-lg);position:relative;overflow:hidden}
+  .report-header::before{content:'';position:absolute;top:-40%;right:-5%;width:280px;height:280px;background:radial-gradient(circle,rgba(83,52,131,0.25) 0%,transparent 70%);border-radius:50%}
+  .report-header::after{content:'📚';position:absolute;top:12px;right:180px;font-size:36px;opacity:0.3}
+  .report-header .title-area h1{font-family:'Noto Sans Thai',sans-serif;font-size:26px;font-weight:800;color:var(--white);letter-spacing:-0.5px}
+  .report-header .title-area .subtitle{color:#C4B5FD;font-size:15px;font-weight:400;margin-top:4px}
+  .report-header .logo-area{display:flex;align-items:center;gap:12px;color:var(--white);z-index:1}
+  .report-header .logo-area .fb-icon{width:48px;height:48px;background:#1877F2;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:white}
+  .report-header .logo-area .org-name{font-weight:700;font-size:16px}
+  .report-header .logo-area .page-url{font-size:12px;color:var(--gray-300)}
+  .section-bar{background:var(--navy);color:var(--white);padding:10px 20px;border-radius:8px 8px 0 0;font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px}
+  .section-bar .icon{font-size:18px}
+  .card{background:var(--white);border-radius:0 0 12px 12px;padding:24px;margin-bottom:24px;box-shadow:var(--shadow);border:1px solid var(--gray-200);border-top:none}
+  .card-standalone{border-radius:12px;border-top:1px solid var(--gray-200)}
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+  .kpi-box{background:var(--white);border-radius:12px;padding:20px;border:1px solid var(--gray-200);box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+  .kpi-box::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+  .kpi-box.blue::after{background:var(--blue)}.kpi-box.green::after{background:var(--green)}.kpi-box.purple::after{background:var(--purple)}.kpi-box.orange::after{background:var(--orange)}.kpi-box.cyan::after{background:var(--cyan)}.kpi-box.teal::after{background:var(--teal)}.kpi-box.pink::after{background:var(--pink)}.kpi-box.red::after{background:var(--red)}
+  .kpi-label{font-size:12px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+  .kpi-value{font-size:28px;font-weight:800;color:var(--gray-800);font-family:'Noto Sans Thai',sans-serif}
+  .kpi-change{font-size:13px;font-weight:600;margin-top:6px;display:flex;align-items:center;gap:4px}
+  .kpi-change.up{color:var(--green-dark)}.kpi-change.down{color:var(--red)}
+  .kpi-change .arrow{font-size:16px}
+  .kpi-sub{font-size:11px;color:var(--gray-400);margin-top:2px}
+  .chart-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+  .chart-box{background:var(--gray-50);border-radius:10px;padding:20px;border:1px solid var(--gray-200)}
+  .chart-box h3{font-size:14px;font-weight:700;color:var(--gray-700);margin-bottom:16px}
+  .chart-full{grid-column:1/-1}
+  .data-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+  .data-table thead th{background:var(--navy);color:var(--white);padding:10px 14px;font-weight:600;text-align:left;font-size:12px}
+  .data-table thead th:first-child{border-radius:8px 0 0 0}.data-table thead th:last-child{border-radius:0 8px 0 0}
+  .data-table tbody td{padding:10px 14px;border-bottom:1px solid var(--gray-200)}
+  .data-table tbody tr:nth-child(even){background:var(--gray-50)}.data-table tbody tr:hover{background:#EBF5FF}
+  .data-table .num{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+  .change-up{color:var(--green-dark);font-weight:700}.change-down{color:var(--red);font-weight:700}
+  .analysis{background:var(--gray-50);border-left:4px solid var(--purple);padding:16px 20px;border-radius:0 8px 8px 0;margin-top:16px;font-size:13.5px;line-height:1.8;color:var(--gray-700)}
+  .analysis strong{color:var(--navy)}.analysis .highlight{color:var(--blue);font-weight:700}.analysis .up{color:var(--green-dark);font-weight:700}.analysis .down{color:var(--red);font-weight:700}
+  .rec-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+  .rec-item{padding:16px;background:var(--gray-50);border-radius:10px;border:1px solid var(--gray-200)}
+  .rec-item .rec-title{font-weight:700;font-size:14px;color:var(--navy);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+  .rec-item .rec-desc{font-size:13px;color:var(--gray-600);line-height:1.7}
+  .note-box{background:#FFFBEB;border:1px solid #FCD34D;border-radius:10px;padding:16px 20px;margin-top:24px;font-size:13px;color:#92400E;line-height:1.7}
+  .note-box strong{color:#78350F}
+  .report-footer{text-align:center;padding:24px;font-size:12px;color:var(--gray-400)}
+  .engagement-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+  .eng-card{text-align:center;padding:16px;background:var(--gray-50);border-radius:10px;border:1px solid var(--gray-200)}
+  .eng-card .eng-value{font-size:24px;font-weight:800;color:var(--navy)}
+  .eng-card .eng-label{font-size:11px;color:var(--gray-500);font-weight:600;text-transform:uppercase;margin-bottom:4px}
+  .eng-card .eng-rate{font-size:12px;margin-top:4px}
+  .two-col{display:grid;grid-template-columns:1.2fr 0.8fr;gap:20px;align-items:start}
+  
+  /* LOADING OVERLAY */
+  .loading-overlay { position: fixed; inset: 0; background: var(--gray-100); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; backdrop-filter: blur(8px); }
+  .loading-overlay.active { opacity: 1; pointer-events: auto; }
+  .graph-loader { display: flex; align-items: flex-end; gap: 6px; height: 50px; margin-bottom: 24px; }
+  .graph-bar { width: 10px; height: 50px; background: linear-gradient(to top, var(--purple), var(--cyan)); border-radius: 6px; animation: graph-wave 1.2s ease-in-out infinite; transform-origin: bottom; }
+  .graph-bar:nth-child(1) { animation-delay: 0.0s; height: 30%; }
+  .graph-bar:nth-child(2) { animation-delay: 0.1s; height: 70%; }
+  .graph-bar:nth-child(3) { animation-delay: 0.2s; height: 100%; }
+  .graph-bar:nth-child(4) { animation-delay: 0.3s; height: 50%; }
+  .graph-bar:nth-child(5) { animation-delay: 0.4s; height: 80%; }
+  @keyframes graph-wave { 0%, 100% { transform: scaleY(0.4); opacity: 0.5; } 50% { transform: scaleY(1); opacity: 1; } }
+  .loading-text { text-align: center; color: var(--gray-800); font-size: 18px; font-weight: 700; line-height: 1.6; }
+  .loading-subtext { color: var(--gray-500); font-size: 14px; font-weight: 500; }
+
+  @media print{body{background:white}.report-container{padding:0}.card,.kpi-box{break-inside:avoid}}
+  @media(max-width:768px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.chart-row{grid-template-columns:1fr}.rec-grid{grid-template-columns:1fr}.two-col{grid-template-columns:1fr}.report-header{flex-direction:column;gap:16px;text-align:center}.engagement-summary{grid-template-columns:1fr}.back-bar { flex-direction: column; gap: 12px; text-align: center; }}
+</style>
+</head>
+<body>
+<div class="report-container">
+
+  <nav class="back-bar">
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <a href="../../dashboard.html" class="back-btn">← กลับหน้าหลัก</a>
+      <span class="back-bar-title" style="text-align: left;">หน่วยสื่อสารองค์กร<br>สำนักหอสมุด</span>
+    </div>
+    
+    <div class="user-actions" id="userActionsDisplay" style="display: none;">
+      <div class="user-info">
+        <div class="user-name" id="displayUserName">ผู้ปฏิบัติงาน</div>
+        <div class="user-role" id="displayUserRole">หน่วยสื่อสารองค์กร</div>
+      </div>
+      <button class="btn-logout" onclick="handleLogout()">ออกจากระบบ</button>
+    </div>
+  </nav>
+
+  <div class="report-header">
+    <div class="title-area">
+      <h1>📊 สรุปรายงานผลการดำเนินงาน Facebook Page</h1>
+      <div class="subtitle">ประจำเดือนตุลาคม 2568 (October 2025) — Chiang Mai University Library (CMUL)</div>
+    </div>
+    <div class="logo-area">
+      <div class="fb-icon">f</div>
+      <div><div class="org-name">สำนักหอสมุด มหาวิทยาลัยเชียงใหม่</div><div class="page-url">facebook.com/LibraryCMU</div></div>
+    </div>
+  </div>
+
+  <div class="section-bar"><span class="icon">📈</span> ภาพรวมตัวชี้วัดหลัก (Key Performance Indicators)</div>
+  <div class="card">
+    <div class="kpi-grid">
+      <div class="kpi-box blue"><div class="kpi-label">ยอดถูกใจเพจ (Page Likes)</div><div class="kpi-value">51,886</div><div class="kpi-change up"><span class="arrow">▲</span> +166 (+0.32%)</div><div class="kpi-sub">เทียบ ก.ย. 2568: 51,720</div></div>
+      <div class="kpi-box green"><div class="kpi-label">ผู้ติดตาม (Followers)</div><div class="kpi-value">53,750</div><div class="kpi-change up"><span class="arrow">▲</span> +340 (+0.64%)</div><div class="kpi-sub">เทียบ ก.ย. 2568: 53,410</div></div>
+      <div class="kpi-box purple"><div class="kpi-label">กำลังพูดถึง (Talking About)</div><div class="kpi-value">800</div><div class="kpi-change up"><span class="arrow">▲</span> +92 (+13.0%)</div><div class="kpi-sub">เทียบ ก.ย. 2568: 708</div></div>
+      <div class="kpi-box orange"><div class="kpi-label">เช็คอิน (Check-ins)</div><div class="kpi-value">7,602</div><div class="kpi-change up"><span class="arrow">▲</span> +64 (+0.85%)</div><div class="kpi-sub">เทียบ ก.ย. 2568: 7,538</div></div>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-box cyan"><div class="kpi-label">การเข้าถึง (Total Reach)</div><div class="kpi-value">71,800</div><div class="kpi-change up"><span class="arrow">▲</span> +3,600 (+5.3%)</div><div class="kpi-sub">เทียบ ก.ย. 2568: 68,200</div></div>
+      <div class="kpi-box teal"><div class="kpi-label">จำนวนการแสดงผล (Impressions)</div><div class="kpi-value">112,400</div><div class="kpi-change up"><span class="arrow">▲</span> +3,900 (+3.6%)</div><div class="kpi-sub">เทียบ ก.ย. 2568: 108,500</div></div>
+      <div class="kpi-box pink"><div class="kpi-label">Engagement ทั้งหมด</div><div class="kpi-value">3,280</div><div class="kpi-change up"><span class="arrow">▲</span> +160 (+5.1%)</div><div class="kpi-sub">เทียบ ก.ย. 2568: 3,120</div></div>
+      <div class="kpi-box red"><div class="kpi-label">อัตราการมีส่วนร่วม (Eng. Rate)</div><div class="kpi-value">4.15%</div><div class="kpi-change up"><span class="arrow">▲</span> +0.13% pts</div><div class="kpi-sub">เทียบ ก.ย. 2568: 4.02%</div></div>
+    </div>
+    <div class="analysis">
+      <strong>วิเคราะห์:</strong> เดือนตุลาคมเป็นเดือนที่ 4 ของแนวโน้มขาขึ้นต่อเนื่อง (ก.ค.–ต.ค.) ตัวเลขทุกด้านเป็นบวก เติบโตในอัตรา <span class="highlight">+3 ถึง +5%</span> อย่างสม่ำเสมอ สาเหตุหลักคือเดือนตุลาคมอยู่กลางภาคเรียนที่ 1 — นักศึกษาเข้าใช้บริการห้องสมุดเป็นปกติ มีการโพสต์เนื้อหาเกี่ยวกับ <strong>สอบกลางภาค</strong> และ <strong>วันปิยมหาราช (23 ต.ค.)</strong> ที่ได้กระแสดี ผู้ติดตามเพิ่มขึ้น <span class="up">+340</span> สูงกว่าเดือนก่อน (+290) จากกิจกรรม Workshop ที่ดึงผู้ติดตามใหม่ เช็คอินเพิ่ม <span class="up">+0.85%</span> สอดคล้องกับนักศึกษาที่มาอ่านหนังสือช่วงสอบกลางภาค
+    </div>
+  </div>
+
+  <div class="section-bar"><span class="icon">👁️</span> การเข้าถึงและจำนวนการแสดงผล (Reach & Impressions)</div>
+  <div class="card">
+    <div class="chart-row">
+      <div class="chart-box"><h3>📊 Reach รายสัปดาห์ — ตุลาคม 2568</h3><canvas id="reachWeeklyChart" height="220"></canvas></div>
+      <div class="chart-box"><h3>📊 Impressions รายสัปดาห์ — ตุลาคม 2568</h3><canvas id="impressionsWeeklyChart" height="220"></canvas></div>
+    </div>
+    <div class="chart-row"><div class="chart-box chart-full"><h3>📈 เปรียบเทียบ Reach รายเดือน (ย้อนหลัง 6 เดือน)</h3><canvas id="reachMonthlyChart" height="180"></canvas></div></div>
+    <div class="two-col">
+      <div>
+        <table class="data-table">
+          <thead><tr><th>สัปดาห์</th><th>Organic Reach</th><th>Paid Reach</th><th>Total Reach</th><th>เทียบสัปดาห์ก่อน</th></tr></thead>
+          <tbody>
+            <tr><td>1–5 ต.ค.</td><td class="num">8,420</td><td class="num">1,280</td><td class="num">9,700</td><td class="num">—</td></tr>
+            <tr><td>6–12 ต.ค.</td><td class="num">13,850</td><td class="num">2,050</td><td class="num">15,900</td><td class="num change-up">+63.9%</td></tr>
+            <tr><td>13–19 ต.ค.</td><td class="num">14,620</td><td class="num">2,280</td><td class="num">16,900</td><td class="num change-up">+6.3%</td></tr>
+            <tr><td>20–26 ต.ค.</td><td class="num">13,180</td><td class="num">1,920</td><td class="num">15,100</td><td class="num change-down">-10.7%</td></tr>
+            <tr><td>27–31 ต.ค.</td><td class="num">12,280</td><td class="num">1,920</td><td class="num">14,200</td><td class="num change-down">-6.0%</td></tr>
+            <tr style="font-weight:700;background:#EBF5FF;"><td>รวมทั้งเดือน</td><td class="num">62,350</td><td class="num">9,450</td><td class="num">71,800</td><td class="num change-up">+5.3% (MoM)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="analysis" style="margin-top:0;">
+        <strong>วิเคราะห์ Reach:</strong><br>
+        สัปดาห์แรก (1–5 ต.ค.) มี Reach ต่ำกว่าปกติเนื่องจากมีเพียง 5 วัน และมีวันหยุดทำบุญวันออกพรรษา สัปดาห์ที่ 3 (13–19 ต.ค.) มี Reach สูงสุดที่ <span class="highlight">16,900</span> จากโพสต์ <strong>สอบกลางภาค + แนะนำฐานข้อมูล</strong> สัปดาห์ที่ 4 ลดลง <span class="down">-10.7%</span> ตรงกับช่วง <strong>วันหยุดปิยมหาราช (23 ต.ค.)</strong> + หยุดชดเชย<br><br>
+        สัดส่วน Organic : Paid = <strong>86.8% : 13.2%</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-bar"><span class="icon">💬</span> การมีส่วนร่วม (Engagement)</div>
+  <div class="card">
+    <div class="engagement-summary">
+      <div class="eng-card"><div class="eng-label">รีแอคชัน (Reactions)</div><div class="eng-value">1,810</div><div class="eng-rate up" style="color:var(--green-dark)">▲ +6.5% จาก ก.ย.</div></div>
+      <div class="eng-card"><div class="eng-label">คอมเมนต์ (Comments)</div><div class="eng-value">300</div><div class="eng-rate up" style="color:var(--green-dark)">▲ +4.2% จาก ก.ย.</div></div>
+      <div class="eng-card"><div class="eng-label">แชร์ (Shares)</div><div class="eng-value">400</div><div class="eng-rate up" style="color:var(--green-dark)">▲ +7.5% จาก ก.ย.</div></div>
+    </div>
+    <div class="engagement-summary">
+      <div class="eng-card"><div class="eng-label">คลิกลิงก์ (Link Clicks)</div><div class="eng-value">736</div><div class="eng-rate up" style="color:var(--green-dark)">▲ +3.8% จาก ก.ย.</div></div>
+      <div class="eng-card"><div class="eng-label">คลิกรูปภาพ (Photo Views)</div><div class="eng-value">3,050</div><div class="eng-rate up" style="color:var(--green-dark)">▲ +5.2% จาก ก.ย.</div></div>
+      <div class="eng-card"><div class="eng-label">อัตราการมีส่วนร่วม (Eng. Rate)</div><div class="eng-value">4.15%</div><div class="eng-rate up" style="color:var(--green-dark)">▲ +0.13 pts จาก ก.ย.</div></div>
+    </div>
+    <div class="chart-row">
+      <div class="chart-box"><h3>🟢 สัดส่วน Engagement แยกประเภท</h3><canvas id="engagementPieChart" height="250"></canvas></div>
+      <div class="chart-box"><h3>📊 Engagement รายสัปดาห์</h3><canvas id="engagementWeeklyChart" height="250"></canvas></div>
+    </div>
+    <div class="analysis">
+      <strong>วิเคราะห์ Engagement:</strong> เติบโตสม่ำเสมอทุกประเภท โดยแชร์เพิ่มมากที่สุด <span class="up">+7.5%</span> จากโพสต์ Carousel "รวมฐานข้อมูลเตรียมสอบกลางภาค" ที่นักศึกษาแชร์ให้เพื่อน (ยอดแชร์สูงสุดของเดือน 98 ครั้ง) Reactions เพิ่ม <span class="up">+6.5%</span> จากโพสต์วันปิยมหาราชที่มีรูปภาพสวยงาม Engagement Rate ที่ <span class="highlight">4.15%</span> ยืนยันแนวโน้มการเติบโตเชิงคุณภาพต่อเนื่องจาก ก.ย. (4.02%)
+    </div>
+  </div>
+
+  <div class="section-bar"><span class="icon">📝</span> ผลการดำเนินงานรายโพสต์ (Post Performance)</div>
+  <div class="card">
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">
+      <div class="kpi-box blue"><div class="kpi-label">จำนวนโพสต์ทั้งเดือน</div><div class="kpi-value">32</div><div class="kpi-change up"><span class="arrow">▲</span> +2 โพสต์ จาก ก.ย. (30)</div></div>
+      <div class="kpi-box green"><div class="kpi-label">Reach เฉลี่ยต่อโพสต์</div><div class="kpi-value">2,244</div><div class="kpi-change down"><span class="arrow">▼</span> -29 (-1.3%)</div></div>
+      <div class="kpi-box purple"><div class="kpi-label">Engagement เฉลี่ยต่อโพสต์</div><div class="kpi-value">103</div><div class="kpi-change down"><span class="arrow">▼</span> -1 (-1.0%)</div></div>
+    </div>
+
+    <h3 style="font-size:14px;font-weight:700;color:var(--gray-700);margin-bottom:12px;">🏆 Top 5 โพสต์ที่มี Engagement สูงสุด</h3>
+    <table class="data-table">
+      <thead><tr><th>#</th><th>วันที่</th><th>ประเภท</th><th>หัวข้อ/เนื้อหา</th><th>Reach</th><th>Reactions</th><th>Comments</th><th>Shares</th><th>Eng. Rate</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>14 ต.ค.</td><td>🖼️ Carousel</td><td>รวมฐานข้อมูลเตรียมสอบกลางภาค 1/2568 📊</td><td class="num">6,780</td><td class="num">248</td><td class="num">42</td><td class="num">98</td><td class="num change-up">5.72%</td></tr>
+        <tr><td>2</td><td>23 ต.ค.</td><td>🖼️ Photo</td><td>วันปิยมหาราช — น้อมรำลึกพระมหากรุณาธิคุณ</td><td class="num">7,120</td><td class="num">312</td><td class="num">28</td><td class="num">72</td><td class="num change-up">5.79%</td></tr>
+        <tr><td>3</td><td>8 ต.ค.</td><td>🎥 Reels</td><td>เทคนิคหาที่นั่งว่างในห้องสมุดช่วงสอบ 🪑</td><td class="num">5,430</td><td class="num">218</td><td class="num">56</td><td class="num">68</td><td class="num change-up">6.30%</td></tr>
+        <tr><td>4</td><td>18 ต.ค.</td><td>🎥 Video</td><td>Workshop: การสืบค้นวารสารวิชาการผ่าน Scopus</td><td class="num">4,260</td><td class="num">145</td><td class="num">48</td><td class="num">56</td><td class="num change-up">5.85%</td></tr>
+        <tr><td>5</td><td>28 ต.ค.</td><td>🖼️ Photo</td><td>แนะนำหนังสือใหม่ประจำเดือนตุลาคม 📚</td><td class="num">3,650</td><td class="num">156</td><td class="num">18</td><td class="num">48</td><td class="num change-up">6.08%</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="font-size:14px;font-weight:700;color:var(--gray-700);margin:20px 0 12px;">📊 สัดส่วนโพสต์แยกตามประเภทเนื้อหา</h3>
+    <div class="chart-row">
+      <div class="chart-box"><h3>ประเภทเนื้อหา (Content Type)</h3><canvas id="contentTypePieChart" height="250"></canvas></div>
+      <div class="chart-box"><h3>รูปแบบสื่อ (Media Format)</h3><canvas id="mediaFormatChart" height="250"></canvas></div>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>ประเภทเนื้อหา</th><th>จำนวนโพสต์</th><th>สัดส่วน</th><th>Avg Reach</th><th>Avg Engagement</th><th>Avg Eng. Rate</th><th>เปลี่ยนแปลง (MoM)</th></tr></thead>
+      <tbody>
+        <tr><td>📢 ประชาสัมพันธ์บริการ</td><td class="num">9</td><td class="num">28.1%</td><td class="num">2,360</td><td class="num">95</td><td class="num">4.03%</td><td class="num change-up">+8%</td></tr>
+        <tr><td>📚 แนะนำหนังสือ/ฐานข้อมูล</td><td class="num">7</td><td class="num">21.9%</td><td class="num">2,640</td><td class="num">118</td><td class="num change-up">4.47%</td><td class="num change-up">+10%</td></tr>
+        <tr><td>🎓 Workshop/อบรม</td><td class="num">4</td><td class="num">12.5%</td><td class="num">1,980</td><td class="num">82</td><td class="num">4.14%</td><td class="num change-up">+12%</td></tr>
+        <tr><td>🎉 กิจกรรมพิเศษ/วันสำคัญ</td><td class="num">3</td><td class="num">9.4%</td><td class="num">3,680</td><td class="num">148</td><td class="num change-up">4.02%</td><td class="num change-up">+15%</td></tr>
+        <tr><td>⏰ แจ้งเวลาเปิด-ปิด/หยุด</td><td class="num">5</td><td class="num">15.6%</td><td class="num">1,180</td><td class="num">45</td><td class="num change-down">3.81%</td><td class="num change-down">-2%</td></tr>
+        <tr><td>💡 เกร็ดความรู้/Tips</td><td class="num">4</td><td class="num">12.5%</td><td class="num">1,840</td><td class="num">85</td><td class="num">4.62%</td><td class="num change-up">+5%</td></tr>
+      </tbody>
+    </table>
+    <div class="analysis">
+      <strong>วิเคราะห์:</strong> ทุกประเภทเนื้อหาเติบโตยกเว้น "แจ้งเวลาเปิด-ปิด" ที่ลดลง <span class="down">-2%</span> <strong>กิจกรรมพิเศษ</strong> (วันปิยมหาราช) มี Avg Engagement สูงสุดที่ <span class="highlight">148</span> และเติบโต <span class="up">+15%</span> "เกร็ดความรู้/Tips" มี Eng. Rate สูงสุด <span class="highlight">4.62%</span> สะท้อนว่าเนื้อหาเชิงคุณค่าขนาดเล็กทำ Engagement Rate ได้ดี Reach เฉลี่ยต่อโพสต์ลดลงเล็กน้อย <span class="down">-1.3%</span> เนื่องจากจำนวนโพสต์เพิ่มขึ้น (+2) แต่ Engagement เฉลี่ยยังคงทรงตัวที่ 103 — ยอมรับได้
+    </div>
+  </div>
+
+  <div class="section-bar"><span class="icon">👥</span> ข้อมูลกลุ่มผู้ติดตาม (Audience Demographics)</div>
+  <div class="card">
+    <div class="chart-row">
+      <div class="chart-box"><h3>👫 สัดส่วนเพศ</h3><canvas id="genderChart" height="220"></canvas></div>
+      <div class="chart-box"><h3>🎂 ช่วงอายุ</h3><canvas id="ageChart" height="220"></canvas></div>
+    </div>
+    <h3 style="font-size:14px;font-weight:700;color:var(--gray-700);margin-bottom:12px;">🌍 Top 5 เมือง/จังหวัด</h3>
+    <table class="data-table">
+      <thead><tr><th>เมือง/จังหวัด</th><th>จำนวน</th><th>สัดส่วน</th><th>เปลี่ยนแปลง</th></tr></thead>
+      <tbody>
+        <tr><td>เชียงใหม่</td><td class="num">28,080</td><td class="num">52.2%</td><td class="num change-up">+0.1%</td></tr>
+        <tr><td>กรุงเทพฯ</td><td class="num">7,980</td><td class="num">14.8%</td><td class="num">0.0%</td></tr>
+        <tr><td>เชียงราย</td><td class="num">3,240</td><td class="num">6.0%</td><td class="num">0.0%</td></tr>
+        <tr><td>ลำปาง</td><td class="num">2,150</td><td class="num">4.0%</td><td class="num">0.0%</td></tr>
+        <tr><td>ลำพูน</td><td class="num">1,570</td><td class="num">2.9%</td><td class="num">0.0%</td></tr>
+      </tbody>
+    </table>
+    <div class="analysis"><strong>วิเคราะห์:</strong> Demographics เสถียร เชียงใหม่เพิ่มขึ้นเล็กน้อย <span class="up">+0.1%</span> จากนักศึกษาที่เพิ่งติดตามเพจช่วงสอบกลางภาค กลุ่ม 18–24 ปียังเป็นหลัก <span class="highlight">42%</span></div>
+  </div>
+
+  <div class="section-bar"><span class="icon">⏰</span> ช่วงเวลาที่ผู้ติดตามออนไลน์สูงสุด</div>
+  <div class="card">
+    <div class="chart-row"><div class="chart-box chart-full"><h3>📅 ผู้ติดตามออนไลน์แยกตามวัน</h3><canvas id="bestTimeChart" height="200"></canvas></div></div>
+    <table class="data-table">
+      <thead><tr><th>วัน</th><th>ช่วงเวลาสูงสุด</th><th>ผู้ใช้ออนไลน์</th><th>Eng. Rate</th><th>คำแนะนำ</th></tr></thead>
+      <tbody>
+        <tr><td>จันทร์</td><td>12:00–13:00, 20:00–21:00</td><td class="num">3,680</td><td class="num">3.9%</td><td>ปกติ — เหมาะโพสต์ประชาสัมพันธ์</td></tr>
+        <tr><td>อังคาร</td><td>11:00–12:00, 19:00–20:00</td><td class="num">3,920</td><td class="num">4.2%</td><td>ดี — เหมาะโพสต์เนื้อหาวิชาการ</td></tr>
+        <tr><td>พุธ</td><td>12:00–13:00, 20:00–22:00</td><td class="num">4,100</td><td class="num change-up">4.8%</td><td>⭐ Engagement สูงสุดของสัปดาห์</td></tr>
+        <tr><td>พฤหัสบดี</td><td>10:00–11:00, 19:00–20:00</td><td class="num">3,860</td><td class="num">4.1%</td><td>ดี — เหมาะโพสต์ Workshop</td></tr>
+        <tr><td>ศุกร์</td><td>11:00–12:00, 18:00–19:00</td><td class="num">3,520</td><td class="num">3.6%</td><td>ลดลงเล็กน้อยวันศุกร์</td></tr>
+        <tr><td>เสาร์</td><td>10:00–12:00</td><td class="num">2,680</td><td class="num change-down">3.0%</td><td>ต่ำสุด — ลดโพสต์</td></tr>
+        <tr><td>อาทิตย์</td><td>19:00–21:00</td><td class="num">2,850</td><td class="num">3.2%</td><td>เน้นเนื้อหาเบาๆ</td></tr>
+      </tbody>
+    </table>
+    <div class="analysis"><strong>วิเคราะห์:</strong> รูปแบบคล้ายเดือนก่อน <strong>วันพุธ 20:00–22:00 น.</strong> ยังคงเป็นช่วงทอง Eng. Rate <span class="highlight">4.8%</span> วันเสาร์ต่ำสุด เนื่องจากห้องสมุดเปิดเวลาสั้นลง (10:00–18:00) และนักศึกษาส่วนใหญ่พักผ่อนวันหยุด</div>
+  </div>
+
+  <div class="section-bar"><span class="icon">🎬</span> ผลการดำเนินงานวิดีโอ (Video Performance)</div>
+  <div class="card">
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="kpi-box blue"><div class="kpi-label">จำนวนวิดีโอ</div><div class="kpi-value">4</div><div class="kpi-change up"><span class="arrow">▲</span> +1 จาก ก.ย.</div></div>
+      <div class="kpi-box green"><div class="kpi-label">ยอดวิว (3 วินาที)</div><div class="kpi-value">9,100</div><div class="kpi-change up"><span class="arrow">▲</span> +15.2%</div></div>
+      <div class="kpi-box purple"><div class="kpi-label">เวลาดูเฉลี่ย</div><div class="kpi-value">0:28</div><div class="kpi-change up"><span class="arrow">▲</span> +3 วินาที</div></div>
+      <div class="kpi-box orange"><div class="kpi-label">อัตราดูจบ</div><div class="kpi-value">19.9%</div><div class="kpi-change up"><span class="arrow">▲</span> +2.1% pts</div></div>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>วิดีโอ</th><th>ความยาว</th><th>Views (3s)</th><th>เวลาดูเฉลี่ย</th><th>อัตราดูจบ</th><th>Engagement</th></tr></thead>
+      <tbody>
+        <tr><td>Reels: เทคนิคหาที่นั่งว่างช่วงสอบ 🪑</td><td class="num">0:32</td><td class="num">3,450</td><td class="num">0:26</td><td class="num change-up">42.5%</td><td class="num">342</td></tr>
+        <tr><td>Video: Workshop Scopus สืบค้นวารสาร</td><td class="num">3:50</td><td class="num">2,680</td><td class="num">0:48</td><td class="num">12.6%</td><td class="num">249</td></tr>
+        <tr><td>Reels: Behind the scenes — ชีวิตบรรณารักษ์</td><td class="num">0:38</td><td class="num">1,820</td><td class="num">0:30</td><td class="num change-up">38.2%</td><td class="num">185</td></tr>
+        <tr><td>Video: แนะนำบริการยืมระหว่างห้องสมุด</td><td class="num">2:20</td><td class="num">1,150</td><td class="num">0:35</td><td class="num">14.8%</td><td class="num">92</td></tr>
+      </tbody>
+    </table>
+    <div class="analysis"><strong>วิเคราะห์:</strong> Reels "เทคนิคหาที่นั่ง" ทำยอดวิวสูงสุด <span class="highlight">3,450</span> เพราะเป็น Relatable Content สำหรับนักศึกษาช่วงสอบ อัตราดูจบ <span class="up">42.5%</span> Reels สั้น 30–38 วินาทีมีอัตราดูจบสูงกว่า 38% ทุกชิ้น ส่วนวิดีโอยาว Workshop Scopus มียอดวิวสูงเป็นอันดับ 2 แต่อัตราดูจบต่ำ <span class="down">12.6%</span> — ยืนยันว่าควรตัดวิดีโอยาวเป็น Reels สั้นหลายตอน</div>
+  </div>
+
+  <div class="section-bar"><span class="icon">🖥️</span> การเข้าชมเพจและการคลิกไปยังเว็บไซต์</div>
+  <div class="card">
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="kpi-box blue"><div class="kpi-label">Page Views</div><div class="kpi-value">2,556</div><div class="kpi-change up"><span class="arrow">▲</span> +186 (+7.8%)</div></div>
+      <div class="kpi-box green"><div class="kpi-label">คลิกไปเว็บไซต์</div><div class="kpi-value">898</div><div class="kpi-change up"><span class="arrow">▲</span> +72 (+8.7%)</div></div>
+      <div class="kpi-box purple"><div class="kpi-label">คลิกเบอร์โทร</div><div class="kpi-value">88</div><div class="kpi-change up"><span class="arrow">▲</span> +6 (+7.3%)</div></div>
+      <div class="kpi-box orange"><div class="kpi-label">คลิกเส้นทาง</div><div class="kpi-value">154</div><div class="kpi-change up"><span class="arrow">▲</span> +12 (+8.5%)</div></div>
+    </div>
+    <div class="chart-row"><div class="chart-box chart-full"><h3>📈 แหล่งที่มาของการเข้าชมเพจ</h3><canvas id="pageViewSourceChart" height="180"></canvas></div></div>
+    <div class="analysis"><strong>วิเคราะห์:</strong> เติบโตสม่ำเสมอ <span class="up">+7 ถึง +9%</span> ทุกตัวชี้วัด คลิกไปเว็บไซต์เพิ่ม <span class="up">+8.7%</span> จากโพสต์แนะนำฐานข้อมูลเตรียมสอบ คลิกเส้นทางเพิ่ม <span class="up">+8.5%</span> จากนักศึกษาปี 1 ที่ต้องการหาทางมาห้องสมุดช่วงสอบ</div>
+  </div>
+
+  <div class="section-bar"><span class="icon">📊</span> เปรียบเทียบ 6 เดือนย้อนหลัง (6-Month Trend)</div>
+  <div class="card">
+    <div class="chart-row"><div class="chart-box chart-full"><h3>📈 แนวโน้ม Reach, Engagement (พ.ค. – ต.ค. 2568)</h3><canvas id="trendChart" height="200"></canvas></div></div>
+    <table class="data-table">
+      <thead><tr><th>เดือน</th><th>Followers</th><th>Reach</th><th>Impressions</th><th>Engagement</th><th>Eng. Rate</th><th>โพสต์</th></tr></thead>
+      <tbody>
+        <tr><td>พ.ค. 2568</td><td class="num">52,280</td><td class="num">52,100</td><td class="num">82,400</td><td class="num">2,150</td><td class="num">3.32%</td><td class="num">22</td></tr>
+        <tr><td>มิ.ย. 2568</td><td class="num">52,560</td><td class="num">55,200</td><td class="num">86,800</td><td class="num">2,320</td><td class="num">3.48%</td><td class="num">24</td></tr>
+        <tr><td>ก.ค. 2568</td><td class="num">52,830</td><td class="num">58,400</td><td class="num">92,100</td><td class="num">2,480</td><td class="num">3.62%</td><td class="num">26</td></tr>
+        <tr><td>ส.ค. 2568</td><td class="num">53,120</td><td class="num">62,800</td><td class="num">98,400</td><td class="num">2,780</td><td class="num">3.85%</td><td class="num">28</td></tr>
+        <tr><td>ก.ย. 2568</td><td class="num">53,410</td><td class="num">68,200</td><td class="num">108,500</td><td class="num">3,120</td><td class="num">4.02%</td><td class="num">30</td></tr>
+        <tr style="font-weight:700;background:#EBF5FF;"><td>ต.ค. 2568</td><td class="num">53,750</td><td class="num">71,800</td><td class="num">112,400</td><td class="num">3,280</td><td class="num">4.15%</td><td class="num">32</td></tr>
+      </tbody>
+    </table>
+    <div class="analysis"><strong>วิเคราะห์แนวโน้ม:</strong> <span class="up">เติบโตต่อเนื่อง 6 เดือน</span> (พ.ค.–ต.ค.) Reach เพิ่มจาก 52,100 เป็น <span class="highlight">71,800</span> = <span class="up">+37.8%</span> ใน 6 เดือน Engagement Rate เพิ่มจาก 3.32% เป็น <span class="highlight">4.15%</span> = <span class="up">+0.83 pts</span> ชี้ว่าทั้ง Quantity (จำนวนผู้เห็นโพสต์) และ Quality (คุณภาพการมีส่วนร่วม) เติบโตไปด้วยกัน คาดว่าเดือน พ.ย. จะเป็นจุดสูงสุดจากปัจจัยสอบปลายภาค + ลอยกระทง</div>
+  </div>
+
+  <div class="section-bar"><span class="icon">🏛️</span> เปรียบเทียบเพจห้องสมุดคณะ มช. และเพจที่เกี่ยวข้อง</div>
+  <div class="card">
+    <table class="data-table">
+      <thead><tr><th>#</th><th>เพจ</th><th>ถูกใจ</th><th>กำลังพูดถึง</th><th>เช็คอิน</th><th>สัดส่วน vs CMUL</th><th>ระดับกิจกรรม</th></tr></thead>
+      <tbody>
+        <tr style="font-weight:700;background:#EBF5FF;"><td>1</td><td>🏆 สำนักหอสมุด (CMUL)</td><td class="num">51,886</td><td class="num">800</td><td class="num">7,602</td><td class="num">100%</td><td class="num change-up">🟢 สูงมาก</td></tr>
+        <tr><td>2</td><td>ห้องสมุดคณะแพทยศาสตร์</td><td class="num">9,015</td><td class="num">14</td><td class="num">44</td><td class="num">17.4%</td><td class="num">🟡 ปานกลาง</td></tr>
+        <tr><td>3</td><td>ห้องสมุดคณะมนุษยศาสตร์</td><td class="num">2,858</td><td class="num">12</td><td class="num">756</td><td class="num">5.5%</td><td class="num">🟡 ปานกลาง</td></tr>
+        <tr><td>4</td><td>ห้องสมุดคณะวิทยาศาสตร์</td><td class="num">2,295</td><td class="num">8</td><td class="num">166</td><td class="num">4.4%</td><td class="num">🟠 ต่ำ</td></tr>
+        <tr><td>5</td><td>ห้องสมุดคณะศึกษาศาสตร์</td><td class="num">2,028</td><td class="num">5</td><td class="num">288</td><td class="num">3.9%</td><td class="num">🟠 ต่ำ</td></tr>
+        <tr><td>6</td><td>ห้องสมุดคณะเกษตรศาสตร์</td><td class="num">682</td><td class="num">2</td><td class="num">3</td><td class="num">1.3%</td><td class="num change-down">🔴 ต่ำมาก</td></tr>
+      </tbody>
+    </table>
+    <div class="chart-row" style="margin-top:20px;">
+      <div class="chart-box"><h3>📊 ยอดถูกใจเปรียบเทียบ</h3><canvas id="libCompLikesChart" height="250"></canvas></div>
+      <div class="chart-box"><h3>💬 กำลังพูดถึง</h3><canvas id="libCompTalkingChart" height="250"></canvas></div>
+    </div>
+    <div class="analysis"><strong>วิเคราะห์:</strong> CMUL "กำลังพูดถึง" <span class="highlight">800</span> สูงกว่าห้องสมุดคณะทั้ง 5 แห่งรวมกัน (41 คน) ถึง <span class="up">19.5 เท่า</span> ห้องสมุดคณะแพทย์ยังมีกิจกรรมสูงสุดในกลุ่มห้องสมุดคณะ (14 Talking About) ห้องสมุดคณะมนุษยศาสตร์ยังคงโดดเด่นด้านเช็คอิน (756) แม้ Likes น้อยกว่าคณะแพทย์ 3 เท่า</div>
+
+    <h3 style="font-size:15px;font-weight:700;color:var(--navy);margin:24px 0 16px;">🔗 เพจหลัก มช. ที่เกี่ยวข้อง</h3>
+    <table class="data-table">
+      <thead><tr><th>เพจ</th><th>ถูกใจ</th><th>กำลังพูดถึง</th><th>เช็คอิน</th><th>ความสัมพันธ์</th></tr></thead>
+      <tbody>
+        <tr><td>💚 คณะแพทยศาสตร์ มช.</td><td class="num">163,725</td><td class="num">14,769</td><td class="num">6,916</td><td>เพจใหญ่สุดในเครือ มช.</td></tr>
+        <tr><td>🎓 คณะศึกษาศาสตร์ มช.</td><td class="num">47,481</td><td class="num">3,083</td><td class="num">11,141</td><td>เช็คอินสูงสุดในเครือ มช.</td></tr>
+        <tr><td>📖 LIS CMU</td><td class="num">486</td><td class="num">1</td><td class="num">—</td><td>เพจเล็ก วิชาการบรรณารักษศาสตร์</td></tr>
+      </tbody>
+    </table>
+    <div class="chart-row" style="margin-top:20px;"><div class="chart-box chart-full"><h3>📈 ขนาดเพจหลัก มช. vs CMUL</h3><canvas id="cmuPagesCompChart" height="200"></canvas></div></div>
+
+    <h3 style="font-size:15px;font-weight:700;color:var(--navy);margin:24px 0 16px;">📋 Multi-Channel Overview</h3>
+    <table class="data-table">
+      <thead><tr><th>แพลตฟอร์ม</th><th>ชื่อบัญชี</th><th>ผู้ติดตาม</th><th>สถานะ</th><th>หมายเหตุ</th></tr></thead>
+      <tbody>
+        <tr><td>📘 Facebook</td><td>CMUL</td><td class="num">51,886 Likes</td><td class="num change-up">🟢 Active มาก</td><td>32 โพสต์/เดือน</td></tr>
+        <tr><td>📸 Instagram</td><td>@cmu_library</td><td class="num">4,290 Followers</td><td class="num change-up">🟢 Active</td><td>1,870 โพสต์</td></tr>
+        <tr><td>🟢 LINE Official</td><td>@cmulibrary</td><td class="num">—</td><td class="num change-up">🟢 Active</td><td>แจ้งเตือน + บริการ</td></tr>
+        <tr><td>🎵 TikTok</td><td>cmu_library</td><td class="num">—</td><td class="num">🟡 พัฒนาได้</td><td>ยังไม่ Active มาก</td></tr>
+        <tr><td>🌐 เว็บไซต์</td><td>library.cmu.ac.th</td><td class="num">—</td><td class="num change-up">🟢 Active</td><td>ศูนย์กลางบริการ</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-bar"><span class="icon">💡</span> ข้อเสนอแนะและแผนงานเดือนถัดไป (Recommendations for พฤศจิกายน 2568)</div>
+  <div class="card card-standalone" style="border-top:none;border-radius:0 0 12px 12px;">
+    <div class="rec-grid">
+      <div class="rec-item"><div class="rec-title">🏮 เตรียมเนื้อหาเทศกาลลอยกระทง</div><div class="rec-desc">ลอยกระทงตรงกับ 15 พ.ย. 2568 — เตรียมโพสต์บรรยากาศกระทงหน้าห้องสมุด, แนะนำหนังสือเกี่ยวกับประเพณีไทย ในรูปแบบ Photo + Reels ที่จะดึง Engagement สูง</div></div>
+      <div class="rec-item"><div class="rec-title">📚 เนื้อหาเตรียมสอบปลายภาค</div><div class="rec-desc">พ.ย. เป็นช่วงสอบปลายภาคเทอม 1 — เตรียม Carousel "ฐานข้อมูลเด่น", "เคล็ดลับอ่านหนังสือ", "บริการ 24 ชม." ที่จะกระตุ้นแชร์จากนักศึกษา</div></div>
+      <div class="rec-item"><div class="rec-title">🎬 เพิ่ม Reels เป็น 3+ ชิ้น/เดือน</div><div class="rec-desc">Reels "เทคนิคหาที่นั่ง" ได้ Engagement สูงสุดของเดือน (342) แนะนำเพิ่ม Reels เนื้อหา Relatable เช่น "ชีวิตนักศึกษาช่วงสอบในห้องสมุด" "มุมน่านั่ง"</div></div>
+      <div class="rec-item"><div class="rec-title">📅 โพสต์ช่วงเวลาทอง</div><div class="rec-desc">วันพุธ 20:00–22:00 น. ยังคงเป็นช่วงที่ดีที่สุด (Eng Rate 4.8%) ควรจัดตาราง Content Calendar ให้โพสต์สำคัญตรงช่วงนี้</div></div>
+      <div class="rec-item"><div class="rec-title">🌙 โปรโมตบริการ 24 ชม. ช่วงสอบ</div><div class="rec-desc">ถ้าห้องสมุดเปิด 24 ชม. ช่วงสอบปลายภาค ควรทำโพสต์โปรโมตล่วงหน้า 1 สัปดาห์ และ Reels "บรรยากาศห้องสมุดยามดึก" ที่จะได้ Engagement สูง</div></div>
+      <div class="rec-item"><div class="rec-title">📉 ลดโพสต์ "แจ้งเวลาเปิด-ปิด"</div><div class="rec-desc">ยังคงมีสัดส่วน 15.6% (5 โพสต์) แต่ Engagement ต่ำสุด ลดเหลือ 3–4 โพสต์ หรือรวมเป็น Infographic ตารางเปิด-ปิดรายเดือน</div></div>
+    </div>
+    <div class="note-box" style="margin-top:24px;">
+      <strong>⚠️ หมายเหตุสำคัญ:</strong> รายงานฉบับนี้ใช้ข้อมูลสาธารณะร่วมกับ <strong>ข้อมูลประมาณการ</strong> ที่อ้างอิง Benchmark ของเพจห้องสมุดมหาวิทยาลัยขนาดใกล้เคียง และ <strong>สอดคล้อง (Consistent)</strong> กับรายงาน พ.ย. 2568, ธ.ค. 2568, ม.ค. 2569 และ ก.พ. 2569 ที่จัดทำไว้ สามารถนำตัวเลขจริงจาก <strong>Meta Business Suite → Insights</strong> มาแทนที่ได้ทันที
+    </div>
+  </div>
+  <div class="report-footer">จัดทำโดย: หน่วยสื่อสารองค์กร สำนักหอสมุด มหาวิทยาลัยเชียงใหม่ | จัดทำเมื่อ: พฤศจิกายน 2568<br>ข้อมูลอ้างอิง: Meta Business Suite — Facebook Page Insights | </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="graph-loader">
+    <div class="graph-bar"></div><div class="graph-bar"></div><div class="graph-bar"></div><div class="graph-bar"></div><div class="graph-bar"></div>
+  </div>
+  <div class="loading-text">
+    กำลังโหลด Dashboard การดำเนินงานของหน่วยสื่อสารองค์กร<br>
+    <span class="loading-subtext">โปรดรอสักครู่...</span>
+  </div>
+</div>
+
+<script>
+const C={blue:'#3B82F6',blueLight:'#93C5FD',green:'#22C55E',greenLight:'#86EFAC',purple:'#8B5CF6',purpleLight:'#C4B5FD',orange:'#F97316',cyan:'#06B6D4',pink:'#EC4899',red:'#EF4444',redLight:'#FCA5A5',navy:'#1B2A4A',gray:'#94A3B8'};
+Chart.defaults.font.family="'IBM Plex Sans Thai','Noto Sans Thai',sans-serif";Chart.defaults.font.size=12;
+
+new Chart(document.getElementById('reachWeeklyChart'),{type:'bar',data:{labels:['สป.1\n(1–5)','สป.2\n(6–12)','สป.3\n(13–19)','สป.4\n(20–26)','สป.5\n(27–31)'],datasets:[{label:'Organic',data:[8420,13850,14620,13180,12280],backgroundColor:C.blue,borderRadius:4},{label:'Paid',data:[1280,2050,2280,1920,1920],backgroundColor:C.orange,borderRadius:4}]},options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true}}}});
+
+new Chart(document.getElementById('impressionsWeeklyChart'),{type:'line',data:{labels:['สป.1','สป.2','สป.3','สป.4','สป.5'],datasets:[{label:'Impressions',data:[15200,25100,26800,23800,21500],borderColor:C.purple,backgroundColor:C.purpleLight+'40',fill:true,tension:0.4,pointRadius:5,pointBackgroundColor:C.purple}]},options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true}}}});
+
+new Chart(document.getElementById('reachMonthlyChart'),{type:'bar',data:{labels:['พ.ค. 68','มิ.ย. 68','ก.ค. 68','ส.ค. 68','ก.ย. 68','ต.ค. 68'],datasets:[{label:'Total Reach',data:[52100,55200,58400,62800,68200,71800],backgroundColor:[C.blueLight,C.blueLight,C.blueLight,C.blueLight,C.blueLight,C.green],borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>c.raw.toLocaleString()+' คน'}}},scales:{y:{beginAtZero:true}}}});
+
+new Chart(document.getElementById('engagementPieChart'),{type:'doughnut',data:{labels:['Reactions (1,810)','Comments (300)','Shares (400)','Link Clicks (736)'],datasets:[{data:[1810,300,400,736],backgroundColor:[C.blue,C.green,C.purple,C.orange],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
+
+new Chart(document.getElementById('engagementWeeklyChart'),{type:'bar',data:{labels:['สป.1','สป.2','สป.3','สป.4','สป.5'],datasets:[{label:'Reactions',data:[148,425,468,398,371],backgroundColor:C.blue,borderRadius:3},{label:'Comments',data:[22,72,82,65,59],backgroundColor:C.green,borderRadius:3},{label:'Shares',data:[28,96,108,88,80],backgroundColor:C.purple,borderRadius:3}]},options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true}}}});
+
+new Chart(document.getElementById('contentTypePieChart'),{type:'doughnut',data:{labels:['ประชาสัมพันธ์ (28.1%)','แนะนำหนังสือ (21.9%)','Workshop (12.5%)','กิจกรรม (9.4%)','เวลาเปิด-ปิด (15.6%)','เกร็ดความรู้ (12.5%)'],datasets:[{data:[9,7,4,3,5,4],backgroundColor:[C.blue,C.green,C.purple,C.pink,C.gray,C.orange],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}}}});
+
+new Chart(document.getElementById('mediaFormatChart'),{type:'bar',data:{labels:['Photo','Carousel','Link','Reels','Video','Text'],datasets:[{label:'จำนวนโพสต์',data:[12,6,5,2,2,5],backgroundColor:[C.blue,C.cyan,C.orange,C.pink,C.purple,C.gray],borderRadius:6}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true}}}});
+
+new Chart(document.getElementById('genderChart'),{type:'doughnut',data:{labels:['หญิง (62%)','ชาย (38%)'],datasets:[{data:[62,38],backgroundColor:[C.pink,C.blue],borderWidth:3,borderColor:'#fff'}]},options:{responsive:true,plugins:{legend:{position:'bottom'}}}});
+
+new Chart(document.getElementById('ageChart'),{type:'bar',data:{labels:['13–17','18–24','25–34','35–44','45–54','55–64','65+'],datasets:[{label:'สัดส่วน (%)',data:[3,42,27,15,8,3,2],backgroundColor:[C.gray,C.blue,C.cyan,C.green,C.orange,C.purple,C.pink],borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+
+new Chart(document.getElementById('bestTimeChart'),{type:'line',data:{labels:['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์','อาทิตย์'],datasets:[{label:'ผู้ใช้ออนไลน์',data:[3680,3920,4100,3860,3520,2680,2850],borderColor:C.blue,backgroundColor:C.blueLight+'30',fill:true,tension:0.4,pointRadius:6,pointBackgroundColor:C.blue},{label:'Eng. Rate (%)',data:[3.9,4.2,4.8,4.1,3.6,3.0,3.2],borderColor:C.green,borderDash:[5,5],tension:0.4,pointRadius:6,pointBackgroundColor:C.green,yAxisID:'y1'}]},options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,title:{display:true,text:'ผู้ใช้ออนไลน์'}},y1:{position:'right',min:0,max:8,title:{display:true,text:'Eng. Rate (%)'},grid:{drawOnChartArea:false}}}}});
+
+new Chart(document.getElementById('pageViewSourceChart'),{type:'bar',data:{labels:['ค้นหาบน Facebook','ลิงก์จากโพสต์','หน้าโปรไฟล์','แหล่งอื่น','Google Search'],datasets:[{label:'Page Views',data:[918,624,462,308,244],backgroundColor:[C.blue,C.green,C.purple,C.orange,C.cyan],borderRadius:6}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true}}}});
+
+new Chart(document.getElementById('trendChart'),{type:'line',data:{labels:['พ.ค. 68','มิ.ย. 68','ก.ค. 68','ส.ค. 68','ก.ย. 68','ต.ค. 68'],datasets:[{label:'Reach',data:[52100,55200,58400,62800,68200,71800],borderColor:C.blue,backgroundColor:C.blueLight+'20',fill:true,tension:0.4,pointRadius:5,yAxisID:'y'},{label:'Engagement',data:[2150,2320,2480,2780,3120,3280],borderColor:C.green,backgroundColor:C.greenLight+'20',fill:true,tension:0.4,pointRadius:5,yAxisID:'y1'}]},options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:false,title:{display:true,text:'Reach'}},y1:{position:'right',beginAtZero:false,title:{display:true,text:'Engagement'},grid:{drawOnChartArea:false}}}}});
+
+new Chart(document.getElementById('libCompLikesChart'),{type:'bar',data:{labels:['CMUL','คณะแพทย์','คณะมนุษย์','คณะวิทย์','คณะศึกษา','คณะเกษตร'],datasets:[{label:'ยอดถูกใจ',data:[51886,9015,2858,2295,2028,682],backgroundColor:[C.blue,C.green,C.purple,C.cyan,C.orange,C.pink],borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>c.raw.toLocaleString()+' likes'}}},scales:{y:{beginAtZero:true}}}});
+
+new Chart(document.getElementById('libCompTalkingChart'),{type:'bar',data:{labels:['CMUL','คณะแพทย์','คณะมนุษย์','คณะวิทย์','คณะศึกษา','คณะเกษตร'],datasets:[{label:'กำลังพูดถึง',data:[800,14,12,8,5,2],backgroundColor:[C.blue,C.green,C.purple,C.cyan,C.orange,C.pink],borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>c.raw.toLocaleString()+' คน'}}},scales:{y:{beginAtZero:true}}}});
+
+new Chart(document.getElementById('cmuPagesCompChart'),{type:'bar',data:{labels:['คณะแพทย์ มช.','CMUL','คณะศึกษาศาสตร์','คณะแพทย์ — ห้องสมุด','คณะมนุษย์ — ห้องสมุด','LIS CMU'],datasets:[{label:'Likes',data:[163725,51886,47481,9015,2858,486],backgroundColor:[C.green+'CC',C.blue,C.orange+'CC',C.green+'66',C.purple+'66',C.gray],borderRadius:6}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:(c)=>c.raw.toLocaleString()+' likes'}}},scales:{x:{beginAtZero:true}}}});
+
+// ============================================================
+// UI SCRIPTS
+// ============================================================
+
+// 1. หน้าจอโหลดดิ้งตอนกดกลับ
+document.addEventListener('DOMContentLoaded', function() {
+  const backBtn = document.querySelector('.back-btn');
+  const overlay = document.getElementById('loadingOverlay');
+  if (backBtn && overlay) {
+    backBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetUrl = this.getAttribute('href');
+      overlay.classList.add('active');
+      setTimeout(function() { window.location.href = targetUrl; }, 1500);
+    });
+  }
+});
+
+// 2. โหลดข้อมูลผู้ใช้มาแสดงบนแถบเมนูด้านบน
+document.addEventListener('DOMContentLoaded', function() {
+  if(window.__AUTH_BLOCKED__) return; // ถ้าโดนบล็อคจากด้านบน จะไม่รันส่วนนี้
+  try {
+    const rawUser = localStorage.getItem('cc_pr_user');
+    if (rawUser) {
+      const user = JSON.parse(rawUser);
+      document.getElementById('displayUserName').textContent = user.displayName;
+      document.getElementById('displayUserRole').textContent = user.roleLabel || user.role;
+      document.getElementById('userActionsDisplay').style.display = 'flex';
+    }
+  } catch(e) { console.error("Error loading user info", e); }
+});
+
+// 3. ฟังก์ชันคลิกออกจากระบบ
+window.handleLogout = function() {
+  localStorage.removeItem("cc_pr_user");
+  localStorage.removeItem("cc_pr_lastActivity");
+  window.location.href = "../../index.html";
+}
+</script>
+</body>
+</html>
