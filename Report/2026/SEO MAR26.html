@@ -6,8 +6,22 @@
   // 1. บล็อคการคลิกขวา
   document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
-  // 2. บล็อคปุ่มลัดต่างๆ และดักการกดปริ้น (Ctrl+P)
+  let blurTimer;
+
+  // ฟังก์ชัน: เบลอหน้าจอทันที และตั้งเวลาให้ค้างไว้ 3 วินาที
+  function lockScreen() { 
+    document.body.classList.add('screenshot-blurred'); 
+    
+    // รีเซ็ตเวลาใหม่ทุกครั้งที่กด เพื่อให้นับ 3 วิใหม่
+    clearTimeout(blurTimer);
+    blurTimer = setTimeout(function() {
+      document.body.classList.remove('screenshot-blurred'); 
+    }, 3000); 
+  }
+
+  // 2. ดักปุ่มลัดต่างๆ และดักการแคปหน้าจอ
   document.addEventListener('keydown', function(e) {
+    // บล็อค DevTools
     if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) { e.preventDefault(); return false; }
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) { e.preventDefault(); return false; }
@@ -15,78 +29,105 @@
     
     // 🖨️ ดักจับการกดปุ่มสั่งปริ้น (Ctrl+P หรือ Cmd+P)
     if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P' || e.keyCode === 80)) {
-      e.preventDefault(); // หยุดการทำงานของคำสั่งปริ้น
-      
-      // แสดงข้อความแจ้งเตือน 2 บรรทัด
+      e.preventDefault();
       alert("🔒 ระบบความปลอดภัย: ไม่อนุญาตให้พิมพ์หรือบันทึกหน้าจอนี้ครับ\nเราจะส่งแจ้งเตือนความปลอดภัยดังกล่าวให้คุณเธียรวิชญ์ทราบ");
-
-      // ส่งคำสั่งเบื้องหลังไปยัง Google Apps Script เพื่อส่งอีเมล
       sendAlertEmail();
-      
       return false;
+    }
+
+    // 🚀 3.1 ทันทีที่กด Start (Meta) + Shift ค้างไว้พร้อมกัน ให้เบลอทันทีแบบไม่มีดีเลย์! 
+    if (e.metaKey && e.shiftKey) {
+      lockScreen();
+    }
+
+    // 📸 3.2 ดักปุ่ม Print Screen แบบกดปุ่มเดียว
+    if (e.key === 'PrintScreen' || e.keyCode === 44) {
+      e.preventDefault();
+      lockScreen();
+      if(navigator.clipboard) {
+         navigator.clipboard.writeText("🔒 ไม่อนุญาตให้แคปหน้าจอจากระบบ PR CMUL").catch(err => {});
+      }
+      sendAlertEmail();
+    }
+
+    // 📸 3.3 เมื่อผู้ใช้กด S ตามมา (ครบสูตร Win+Shift+S) 
+    if (
+      (e.metaKey && e.shiftKey && (e.key === 's' || e.key === 'S')) || 
+      (e.metaKey && e.shiftKey && ['3','4','5'].includes(e.key))
+    ) {
+      e.preventDefault();
+      lockScreen(); 
+      if(navigator.clipboard) {
+         navigator.clipboard.writeText("🔒 ไม่อนุญาตให้แคปหน้าจอจากระบบ PR CMUL").catch(err => {});
+      }
+      sendAlertEmail();
     }
   });
 
-  // 3. วางกับดัก Debugger Loop
-  if (!window.__AUTH_BLOCKED__) {
+  // 4. วางกับดัก Debugger Loop ป้องกันคน Inspect Code (ถ้าไม่ใช่หน้า Login ที่อาจจะตั้งค่าตัวแปรบล็อคไว้)
+  if (typeof window.__AUTH_BLOCKED__ === 'undefined' || !window.__AUTH_BLOCKED__) {
     setInterval(function() {
       var before = new Date().getTime();
       debugger; 
       var after = new Date().getTime();
-      if (after - before > 100) { document.body.innerHTML = '<div style="text-align:center;padding:50px;font-family:sans-serif;"><h1>Access Denied</h1></div>'; }
+      if (after - before > 100) { 
+        document.body.innerHTML = '<div style="display:flex; height:100vh; align-items:center; justify-content:center; background:#f3f5f9; font-family:sans-serif;"><div style="background:#fff; padding:40px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.1); text-align:center;"><h1 style="color:#ef4444; margin-bottom:10px;">Access Denied</h1><p>ไม่อนุญาตให้เข้าถึงซอร์สโค้ดของระบบ</p></div></div>'; 
+      }
     }, 1000);
   }
 })();
 
 // ฟังก์ชันส่งอีเมลแจ้งเตือนการละเมิดความปลอดภัย
 function sendAlertEmail() {
-  // ลิงก์ Google Apps Script ของคุณที่ใช้รัน API
   const scriptURL = "https://script.google.com/macros/s/AKfycbz0Ba8RTgWOVn7Y-NXhw5CQs3FTlC8HD7F6ysGvD55LXZxxQ3VAbvTnbNO3GPrQ9S8qbA/exec";
-  // https://script.google.com/macros/s/AKfycbz0Ba8RTgWOVn7Y-NXhw5CQs3FTlC8HD7F6ysGvD55LXZxxQ3VAbvTnbNO3GPrQ9S8qbA/exec
-  
-  // เก็บข้อมูลว่าใครเป็นคนพยายามปริ้น (ดึงจาก LocalStorage ถ้าล็อคอินอยู่)
   let username = "ผู้เยี่ยมชม (ยังไม่ได้ล็อคอิน)";
   try {
     const raw = localStorage.getItem('cc_pr_user');
     if (raw) { username = JSON.parse(raw).username; }
   } catch(e) {}
 
-  // ส่งข้อมูลไปให้ Google Apps Script ส่งอีเมล
   fetch(scriptURL + "?action=sendAlertEmail&user=" + encodeURIComponent(username), {
-    method: 'GET',
-    mode: 'no-cors' // ส่งไปเงียบๆ ไม่ต้องรอผลลัพธ์เพื่อไม่ให้กระทบผู้ใช้
+    method: 'GET', mode: 'no-cors'
   }).catch(err => console.log(err));
 }
 </script>
 
 <style>
-  /* CSS เพิ่มเติม: กรณีเขากดปริ้นจากเมนูของเบราว์เซอร์โดยไม่ใช้คีย์บอร์ด */
+  /* 🖨️ กรณีสั่ง Print จากเมนูของเบราว์เซอร์ */
   @media print {
-    body * {
-      visibility: hidden !important;
-      display: none !important;
-    }
-    body {
-      background-color: white !important;
-      background-image: none !important;
-    }
+    body * { visibility: hidden !important; display: none !important; }
+    body { background-color: white !important; background-image: none !important; }
     body::before {
-      content: "🔒 ระบบความปลอดภัย: ไม่อนุญาตให้พิมพ์หรือบันทึกหน้าจอนี้ครับ เราจะส่งแจ้งเตือนความปลอดภัยดังกล่าวให้ คุณเธียรวิชญ์ทราบ";
-      visibility: visible !important;
-      display: block !important;
-      position: absolute;
-      top: 100px;
-      left: 0;
-      right: 0;
-      text-align: center;
-      font-size: 35px;
-      font-weight: bold;
-      color: #ef4444;
-      white-space: pre-line;
-      font-family: 'Noto Sans Thai', sans-serif;
+      content: "🔒 ระบบความปลอดภัย: ไม่อนุญาตให้พิมพ์หรือบันทึกหน้าจอนี้ครับ \A เราจะส่งแจ้งเตือนความปลอดภัยดังกล่าวให้ คุณเธียรวิชญ์ทราบ";
+      visibility: visible !important; display: flex !important; position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0; align-items: center; justify-content: center;
+      text-align: center; font-size: 35px; font-weight: bold; color: #ef4444; 
+      white-space: pre-wrap; font-family: 'Noto Sans Thai', sans-serif;
     }
   }
+
+  /* 📸 กรณีหน้าต่างเบลอเมื่อโดนแคปหน้าจอ (ทำงานทันที) */
+  /* บังคับเบลอทุก Element ที่อยู่ใต้ body แบบ Universal */
+  body.screenshot-blurred > * {
+    filter: blur(40px) grayscale(80%) !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    transition: none !important;
+  }
+  
+  /* สร้างข้อความแจ้งเตือนขึ้นมาทับหน้าจอเบลอ ด้วย CSS ล้วน (ไม่โดนเบลอไปด้วย) */
+  body.screenshot-blurred::before {
+    content: "🔒 ตรวจพบการพยายามบันทึกหน้าจอ \A ระบบรักษาความปลอดภัย: ไม่อนุญาตให้แคปหน้าจอภาพข้อมูลนี้ครับ";
+    position: fixed; inset: 0; z-index: 999999;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, 0.85);
+    text-align: center; font-size: 35px; font-weight: bold; color: #dc2626; 
+    white-space: pre-wrap; font-family: 'Noto Sans Thai', sans-serif;
+    line-height: 1.5; padding: 20px;
+    transition: none !important;
+  }
 </style>
+  
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>CMUL Facebook Page Report - มีนาคม 2569</title>
