@@ -5,59 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>เข้าสู่ระบบ - PR CMUL Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <script>
 (function() {
-  // 1. บล็อคการคลิกขวา
-  document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-  });
-
-  // 2. บล็อคปุ่มลัดที่ใช้เปิด DevTools (F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U)
+  document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
   document.addEventListener('keydown', function(e) {
-    // F12
-    if (e.key === 'F12' || e.keyCode === 123) {
-      e.preventDefault();
-      return false;
-    }
-    // Ctrl+Shift+I หรือ Mac (Cmd+Option+I)
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) {
-      e.preventDefault();
-      return false;
-    }
-    // Ctrl+Shift+J หรือ Mac (Cmd+Option+J)
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) {
-      e.preventDefault();
-      return false;
-    }
-    // Ctrl+U (View Source)
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) {
-      e.preventDefault();
-      return false;
-    }
+    if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) { e.preventDefault(); return false; }
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) { e.preventDefault(); return false; }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) { e.preventDefault(); return false; }
   });
-
-  // 3. วางกับดัก Debugger Loop (คงเดิม)
   setInterval(function() {
     var before = new Date().getTime();
     debugger; 
     var after = new Date().getTime();
-    if (after - before > 100) {
-      document.body.innerHTML = '<div style="text-align:center;padding:50px;font-family:sans-serif;"><h1>Access Denied</h1></div>';
-    }
+    if (after - before > 100) { document.body.innerHTML = '<div style="text-align:center;padding:50px;font-family:sans-serif;"><h1>Access Denied</h1></div>'; }
   }, 1000);
 })();
   </script>
 
   <style>
     /* ============================================================
-       🎨 ส่วนการแสดงผล (ปรับเฉพาะสีพื้นหลังและกรอบใส)
+       🎨 ส่วนการแสดงผล
        ============================================================ */
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Noto Sans Thai', sans-serif; }
     
     body {
-      /* ปรับจุดที่ 1: สีพื้นหลังเป็นม่วงชมพู gradient โทนกลาง (ไม่มืดและไม่สว่างจ้า) */
-      background: linear-gradient(135deg, #a78bfa 0%, #f472b6 100%);
+      /* พื้นหลังด้านนอก: สีม่วงชมพู gradient */
+      background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -65,85 +41,165 @@
       padding: 20px;
     }
 
+    /* กรอบล็อคอินสีขาวทึบ (เหมือนภาพต้นฉบับ) */
     .login-card {
-      /* ปรับจุดที่ 2: ทำกรอบใสแบบกระจก (Glassmorphism) */
-      background: rgba(255, 255, 255, 0.55); /* พื้นหลังสีขาวโปร่งแสง */
-      backdrop-filter: blur(12px); /* เอฟเฟกต์เบลอพื้นหลัง */
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.7); /* เส้นขอบใส */
-      
+      background: #ffffff;
       width: 100%;
-      max-width: 440px;
+      max-width: 400px; /* ปรับขนาดให้แคบลงคล้ายในภาพ */
       border-radius: 24px;
-      padding: 48px 40px;
-      box-shadow: 0 25px 60px rgba(0,0,0,0.1); /* เงาบางๆ */
+      padding: 40px 32px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
       position: relative;
+      text-align: center;
+    }
+
+    /* องค์ประกอบภาพด้านบน */
+    .illustration-box {
+      margin-bottom: 20px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    /* โลโก้เพจ (วงกลม) */
+    .page-logo {
+      width: 56px;
+      height: 56px;
+      background-color: #38bdf8; /* สีฟ้าตามภาพ */
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
       overflow: hidden;
-      transition: all 0.4s ease;
+      border: 3px solid #fff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .page-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
-    /* --- ส่วนการแสดงผลอื่นๆ คงเดิมทุกประการ --- */
-    .login-card.success-mode { padding: 60px 40px; text-align: center; }
-    .header-area { text-align: center; margin-bottom: 32px; transition: opacity 0.3s; }
-    
-    /* แก้ไขส่วนโลโก้: เปลี่ยนจากตัวหนังสือเป็น tag <img> สำหรับใส่รูปภาพ */
-    .logo-box { 
-      width: 72px; 
-      height: 72px; 
-      background: linear-gradient(135deg, #3b82f6, #6366f1); 
-      border-radius: 20px; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      margin: 0 auto 20px; 
-      box-shadow: 0 10px 20px rgba(59,130,246,0.3); 
-      transform: rotate(-5deg); 
-      overflow: hidden; /* บังคับให้รูปอยู่ในกรอบ */
+    /* ข้อความต้อนรับ */
+    .title { 
+      font-size: 22px; 
+      font-weight: 800; 
+      color: #1e293b; 
+      margin-bottom: 4px;
     }
-    .logo-box img {
-      max-width: 100%; /* ปรับขนาดรูปให้พอดีกรอบ */
-      height: auto;
-      display: block;
+    .subtitle { 
+      color: #64748b; 
+      font-size: 13px; 
+      font-weight: 500;
+      line-height: 1.4;
+      margin-bottom: 24px;
     }
 
-    .title { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; letter-spacing: -0.5px; }
-    .subtitle { color: #64748b; font-size: 14px; font-weight: 500; }
+    /* ช่องกรอกข้อมูล */
+    .input-group { margin-bottom: 16px; text-align: left; position: relative; }
     
-    .input-group { margin-bottom: 20px; text-align: left; }
-    .input-label { display: block; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 8px; }
-    .input-field { width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 15px; color: #1e293b; background: #f8fafc; transition: all 0.2s; outline: none; }
-    .input-field:focus { border-color: #3b82f6; background: #fff; box-shadow: 0 0 0 4px rgba(59,130,246,0.1); }
+    .input-field { 
+      width: 100%; 
+      padding: 12px 16px 12px 40px; /* เผื่อที่ให้ไอคอน */
+      border: 1px solid #e2e8f0; 
+      border-radius: 12px; 
+      font-size: 14px; 
+      color: #1e293b; 
+      background: #f8fafc; 
+      transition: all 0.2s; 
+      outline: none; 
+    }
+    .input-field:focus { 
+      border-color: #3b82f6; 
+      background: #fff; 
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1); 
+    }
     
-    .btn-login { width: 100%; padding: 14px; border: none; border-radius: 12px; background: linear-gradient(135deg, #2563eb, #4f46e5); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 20px rgba(37,99,235,0.2); position: relative; overflow: hidden; margin-top: 8px; }
-    .btn-login:hover { transform: translateY(-2px); box-shadow: 0 15px 25px rgba(37,99,235,0.3); }
-    .btn-login:active { transform: translateY(0); }
-    .btn-login.loading { color: transparent; pointer-events: none; }
-    .btn-login.loading::after { content: ''; position: absolute; left: 50%; top: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
-    
+    /* ไอคอนในช่องกรอกข้อมูล */
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      color: #94a3b8;
+      font-size: 14px;
+    }
+
+    /* ปุ่มล็อคอิน */
+    .btn-login { 
+      width: 100%; 
+      padding: 14px; 
+      border: none; 
+      border-radius: 12px; 
+      background: #2563eb; /* สีน้ำเงินเข้มตามภาพ */
+      color: #fff; 
+      font-size: 15px; 
+      font-weight: 700; 
+      cursor: pointer; 
+      transition: all 0.3s; 
+      box-shadow: 0 4px 12px rgba(37,99,235,0.2); 
+      margin-top: 8px; 
+    }
+    .btn-login:hover { background: #1d4ed8; }
+    .btn-login.loading { color: transparent; pointer-events: none; position: relative; }
+    .btn-login.loading::after { 
+      content: ''; position: absolute; left: 50%; top: 50%; width: 20px; height: 20px; 
+      margin: -10px 0 0 -10px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; 
+      border-radius: 50%; animation: spin 0.8s linear infinite; 
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
-    
-    .error-msg { color: #ef4444; font-size: 13px; font-weight: 600; text-align: center; margin-top: 16px; padding: 10px; background: #fef2f2; border-radius: 8px; border: 1px solid #fee2e2; display: none; }
+
+    .error-msg { 
+      color: #ef4444; font-size: 13px; font-weight: 600; text-align: center; 
+      margin-top: 16px; padding: 10px; background: #fef2f2; border-radius: 8px; 
+      border: 1px solid #fee2e2; display: none; 
+    }
     .error-msg.show { display: block; animation: shake 0.4s ease; }
     @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 
-    .footer-note { text-align: center; margin-top: 32px; font-size: 12px; color: #94a3b8; font-weight: 500; }
+    /* โลโก้มช. ด้านล่าง (Footer Note) */
+    .footer-note { 
+      margin-top: 32px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 8px;
+    }
+    .footer-note img {
+      height: 24px;
+      opacity: 0.7;
+    }
+    .footer-text {
+      font-size: 12px; 
+      color: #64748b; 
+      font-weight: 500;
+      text-align: left;
+      line-height: 1.2;
+    }
 
-    /* Success State (คงเดิม) */
-    .success-content { display: none; opacity: 0; transition: opacity 0.5s; }
+    /* ภาพกราฟิกหนังสือซ้อนกัน (จำลอง CSS แบบง่าย ถ้าคุณมีไฟล์รูปให้ใช้ tag img แทนได้เลย) */
+    .books-graphic {
+      position: absolute;
+      right: -20px;
+      bottom: 20px;
+      width: 120px;
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    /* Success State */
+    .success-content { display: none; opacity: 0; transition: opacity 0.5s; padding: 20px 0;}
     .success-content.show { display: block; opacity: 1; }
-    .check-icon { width: 80px; height: 80px; background: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; color: #fff; font-size: 40px; box-shadow: 0 10px 25px rgba(16,185,129,0.3); animation: scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .check-icon { width: 70px; height: 70px; background: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: #fff; font-size: 32px; box-shadow: 0 10px 25px rgba(16,185,129,0.3); animation: scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     @keyframes scaleUp { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-    .success-title { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 12px; }
-    .user-badge { display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 8px 16px; border-radius: 50px; font-size: 14px; font-weight: 700; color: #475569; margin-bottom: 24px; border: 1px solid #e2e8f0; }
+    .success-title { font-size: 22px; font-weight: 800; color: #1e293b; margin-bottom: 12px; }
+    .user-badge { display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 8px 16px; border-radius: 50px; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 20px; border: 1px solid #e2e8f0; }
     
-    .role-badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; color: #fff; text-transform: uppercase; }
+    .role-badge { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; color: #fff; text-transform: uppercase; }
     .role-badge.admin { background: #ef4444; }
     .role-badge.manager { background: #f59e0b; }
     .role-badge.viewer { background: #3b82f6; }
 
-    .redirect-text { color: #64748b; font-size: 14px; font-weight: 500; display: none; }
-    .btn-go { display: none; padding: 12px 32px; background: #1e293b; color: #fff; text-decoration: none; border-radius: 50px; font-weight: 700; font-size: 14px; transition: 0.3s; margin-top: 16px; }
-    .btn-go:hover { background: #0f172a; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    .redirect-text { color: #64748b; font-size: 13px; font-weight: 500; display: none; }
   </style>
 </head>
 <body>
@@ -151,29 +207,33 @@
 <div class="login-card" id="loginCard">
   
   <form id="loginForm" onsubmit="return handleLogin(event)">
-    <div class="header-area">
-      <div class="logo-box">
-        <img src="your-logo.png" alt="PR Logo"> 
-      </div>
-      <h1 class="title">เข้าสู่ระบบ</h1>
-      <p class="subtitle">ระบบ Dashboard สรุปผลการดำเนินงาน<br>หน่วยสื่อสารองค์กร สำนักหอสมุด</p>
+    
+    <div class="page-logo">
+      <img src="Web logo.png" alt="Logo" onerror="this.style.display='none'; this.parentNode.innerHTML='PR';">
     </div>
 
+    <h1 class="title">ยินดีต้อนรับ</h1>
+    <p class="subtitle">ระบบ Dashboard<br>การดำเนินงานหน่วยสื่อสารองค์กร</p>
+
     <div class="input-group">
-      <label class="input-label">ชื่อผู้ใช้งาน</label>
-      <input type="text" id="uname" class="input-field" placeholder="กรอกชื่อผู้ใช้งาน..." autocomplete="off" required>
+      <i class="fa-regular fa-user input-icon"></i>
+      <input type="text" id="uname" class="input-field" placeholder="ชื่อผู้ใช้" autocomplete="off" required>
     </div>
     
     <div class="input-group">
-      <label class="input-label">รหัสผ่าน</label>
-      <input type="password" id="psw" class="input-field" placeholder="กรอกรหัสผ่าน..." required>
+      <i class="fa-solid fa-lock input-icon"></i>
+      <input type="password" id="psw" class="input-field" placeholder="รหัสผ่าน" required>
     </div>
     
-    <button type="submit" class="btn-login" id="loginBtn">ลงชื่อเข้าใช้</button>
+    <button type="submit" class="btn-login" id="loginBtn">เข้าสู่ระบบ</button>
     <div id="errorMsg" class="error-msg"></div>
     
-    <div class="footer-note">© 2025 Chiang Mai University Library</div>
-  </form>
+    <div class="footer-note">
+      <img src="https://img.icons8.com/color/48/000000/university.png" alt="CMU">
+      <div class="footer-text">สำนักหอสมุด<br>มหาวิทยาลัยเชียงใหม่</div>
+    </div>
+    
+    </form>
 
   <div class="success-content" id="successContent">
     <div class="check-icon">✓</div>
@@ -183,20 +243,17 @@
       <span class="role-badge" id="roleBadge"></span>
     </div>
     <p class="redirect-text" id="redirectMsg">กำลังพาคุณไปหน้า Dashboard...</p>
-    <a href="#" class="btn-go" id="goBtn" onclick="goToDashboard(); return false;">ไปที่ Dashboard ทันที ➔</a>
   </div>
 
 </div>
 
 <script>
-  // ข้อมูลบัญชีผู้ใช้ (คงเดิม)
   const accounts = {
     "admin":   { password: "password", displayName: "ผู้ปฏิบัติงาน", role: "admin", roleLabel: "หน่วยสื่อสารองค์กร" },
     "manager": { password: "123", displayName: "หัวหน้าฝ่าย", role: "manager", roleLabel: "ผู้บริหาร" },
     "viewer":  { password: "abc", displayName: "ผู้เยี่ยมชม", role: "viewer", roleLabel: "ผู้เยี่ยมชม" }
   };
 
-  // ฟังก์ชันจัดการการเข้าสู่ระบบ (คงเดิม)
   function handleLogin(e) {
     e.preventDefault();
     const uname = document.getElementById("uname").value.trim();
@@ -207,10 +264,8 @@
     error.classList.remove('show');
     btn.classList.add('loading');
 
-    // Simulate API delay (คงเดิม)
     setTimeout(() => {
       if (accounts[uname] && accounts[uname].password === psw) {
-          // สำเร็จ (คงเดิม)
           const acc = accounts[uname];
           
           const sessionData = {
@@ -223,9 +278,7 @@
           localStorage.setItem('cc_pr_user', JSON.stringify(sessionData));
           localStorage.setItem('cc_pr_lastActivity', Date.now().toString());
 
-          // เปลี่ยนหน้าตาเป็นสำเร็จ (คงเดิม)
           document.getElementById('loginForm').style.display = 'none';
-          document.getElementById('loginCard').classList.add('success-mode');
           
           const successContent = document.getElementById('successContent');
           successContent.classList.add('show');
@@ -237,24 +290,22 @@
           badge.className = 'role-badge ' + acc.role;
           badge.style.display = 'inline-block';
 
-          document.getElementById('goBtn').style.display = 'inline-block';
           const msg = document.getElementById('redirectMsg');
           msg.style.display = 'block';
           
-          let count = 3;
+          let count = 2;
           msg.textContent = `กำลังพาคุณไปหน้า Dashboard ใน ${count} วินาที...`;
           let timer = setInterval(() => {
             count--;
             if (count <= 0) {
               clearInterval(timer);
-              goToDashboard();
+              window.location.href = 'dashboard.html';
             } else {
               msg.textContent = `กำลังพาคุณไปหน้า Dashboard ใน ${count} วินาที...`;
             }
           }, 1000);
 
         } else {
-          // ผิดพลาด (คงเดิม)
           error.textContent = "ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง";
           btn.classList.remove('loading');
           error.classList.add('show');
@@ -263,11 +314,6 @@
     return false;
   }
 
-  function goToDashboard() {
-    window.location.href = 'dashboard.html';
-  }
-
-  // ตรวจสอบเซสชั่นเดิม (คงเดิม)
   (function checkLogin() {
     try {
       const raw = localStorage.getItem('cc_pr_user');
