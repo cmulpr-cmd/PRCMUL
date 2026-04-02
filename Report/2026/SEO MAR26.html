@@ -3,31 +3,64 @@
 <head>
 <script>
 (function() {
-  // 1. บล็อคการคลิกขวา
-  document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+  // ==========================================
+  // 1. ระบบตรวจสอบสิทธิ์เข้าใช้งาน (Authentication Check)
+  // ==========================================
+  var allowed = false;
+  try {
+    var raw = localStorage.getItem('cc_pr_user');
+    if (raw) {
+      var user = JSON.parse(raw);
+      if (user.username && user.displayName && user.role && user.loggedInAt) {
+        var TIMEOUT_MS = 30 * 60 * 1000; 
+        if (Date.now() - new Date(user.loggedInAt).getTime() < 24 * 60 * 60 * 1000) { 
+          var lastAct = localStorage.getItem('cc_pr_lastActivity');
+          if (lastAct && (Date.now() - parseInt(lastAct, 10)) > TIMEOUT_MS) {
+            localStorage.removeItem('cc_pr_user'); localStorage.removeItem('cc_pr_lastActivity');
+          } else {
+            localStorage.setItem('cc_pr_lastActivity', Date.now().toString());
+            allowed = true;
+          }
+        } else {
+          localStorage.removeItem('cc_pr_user'); localStorage.removeItem('cc_pr_lastActivity');
+        }
+      }
+    }
+  } catch(e) {}
 
-  let blurTimer;
-
-  // ฟังก์ชัน: เบลอหน้าจอทันที และตั้งเวลาให้ค้างไว้ 3 วินาที
-  function lockScreen() { 
-    document.body.classList.add('screenshot-blurred'); 
-    
-    // รีเซ็ตเวลาใหม่ทุกครั้งที่กด เพื่อให้นับ 3 วิใหม่
-    clearTimeout(blurTimer);
-    blurTimer = setTimeout(function() {
-      document.body.classList.remove('screenshot-blurred'); 
-    }, 3000); 
+  // หากไม่ได้ล็อกอิน ให้เคลียร์หน้าจอและแสดงหน้า Access Denied ทันที
+  if (!allowed) {
+    window.__AUTH_BLOCKED__ = true;
+    document.addEventListener('DOMContentLoaded', function() {
+      document.body.innerHTML = 
+        '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f3f5f9;font-family:\'Noto Sans Thai\',sans-serif; margin:0;">' +
+          '<div style="background:#fff;border-radius:24px;padding:48px 40px;text-align:center;max-width:440px;width:90%;box-shadow:0 25px 60px rgba(0,0,0,0.05); border-top: 5px solid #ef4444;">' +
+            '<div style="font-size: 48px; margin-bottom: 12px;">🔒</div>' +
+            '<h1 style="font-size:28px;font-weight:900;margin-bottom:12px;background:linear-gradient(135deg, #ef4444, #991b1b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:inline-block;">Access Denied</h1>' +
+            '<p style="color:#475569;font-size:15px;line-height:1.6;margin-bottom:28px;font-weight:500;">หากท่านเป็นผู้ปฏิบัติงาน "หน่วยสื่อสารองค์กร"<br>กรุณาเข้าสู่ระบบก่อนใช้งาน</p>' +
+            '<a href="../../index.html" style="display:inline-block;padding:12px 36px;border-radius:12px;background:linear-gradient(135deg, #7c3aed, #2563eb);color:#fff;text-decoration:none;font-weight:700;font-size:15px;box-shadow:0 8px 20px rgba(124,58,237,0.25); transition:transform 0.2s;">กลับไปหน้าเข้าสู่ระบบ</a>' +
+          '</div>' +
+        '</div>';
+    });
   }
 
-  // 2. ดักปุ่มลัดต่างๆ และดักการแคปหน้าจอ
+  // ==========================================
+  // 2. ระบบรักษาความปลอดภัย (ป้องกันแคป/ปริ้น/Inspect)
+  // ==========================================
+  document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+  let blurTimer;
+  function lockScreen() { 
+    document.body.classList.add('screenshot-blurred'); 
+    clearTimeout(blurTimer);
+    blurTimer = setTimeout(function() { document.body.classList.remove('screenshot-blurred'); }, 3000); 
+  }
+
   document.addEventListener('keydown', function(e) {
-    // บล็อค DevTools
     if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) { e.preventDefault(); return false; }
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) { e.preventDefault(); return false; }
     if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) { e.preventDefault(); return false; }
     
-    // 🖨️ ดักจับการกดปุ่มสั่งปริ้น (Ctrl+P หรือ Cmd+P)
     if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P' || e.keyCode === 80)) {
       e.preventDefault();
       alert("🔒 ระบบความปลอดภัย: ไม่อนุญาตให้พิมพ์หรือบันทึกหน้าจอนี้ครับ\nเราจะส่งแจ้งเตือนความปลอดภัยดังกล่าวให้คุณเธียรวิชญ์ทราบ");
@@ -35,41 +68,24 @@
       return false;
     }
 
-    // 🚀 3.1 ทันทีที่กด Start (Meta) + Shift ค้างไว้พร้อมกัน ให้เบลอทันทีแบบไม่มีดีเลย์! 
-    if (e.metaKey && e.shiftKey) {
-      lockScreen();
-    }
+    if (e.metaKey && e.shiftKey) { lockScreen(); }
 
-    // 📸 3.2 ดักปุ่ม Print Screen แบบกดปุ่มเดียว
     if (e.key === 'PrintScreen' || e.keyCode === 44) {
-      e.preventDefault();
-      lockScreen();
-      if(navigator.clipboard) {
-         navigator.clipboard.writeText("🔒 ไม่อนุญาตให้แคปหน้าจอจากระบบ PR CMUL").catch(err => {});
-      }
+      e.preventDefault(); lockScreen();
+      if(navigator.clipboard) { navigator.clipboard.writeText("🔒 ไม่อนุญาตให้แคปหน้าจอจากระบบ PR CMUL").catch(err => {}); }
       sendAlertEmail();
     }
 
-    // 📸 3.3 เมื่อผู้ใช้กด S ตามมา (ครบสูตร Win+Shift+S) 
-    if (
-      (e.metaKey && e.shiftKey && (e.key === 's' || e.key === 'S')) || 
-      (e.metaKey && e.shiftKey && ['3','4','5'].includes(e.key))
-    ) {
-      e.preventDefault();
-      lockScreen(); 
-      if(navigator.clipboard) {
-         navigator.clipboard.writeText("🔒 ไม่อนุญาตให้แคปหน้าจอจากระบบ PR CMUL").catch(err => {});
-      }
+    if ((e.metaKey && e.shiftKey && (e.key === 's' || e.key === 'S')) || (e.metaKey && e.shiftKey && ['3','4','5'].includes(e.key))) {
+      e.preventDefault(); lockScreen(); 
+      if(navigator.clipboard) { navigator.clipboard.writeText("🔒 ไม่อนุญาตให้แคปหน้าจอจากระบบ PR CMUL").catch(err => {}); }
       sendAlertEmail();
     }
   });
 
-  // 4. วางกับดัก Debugger Loop ป้องกันคน Inspect Code (ถ้าไม่ใช่หน้า Login ที่อาจจะตั้งค่าตัวแปรบล็อคไว้)
   if (typeof window.__AUTH_BLOCKED__ === 'undefined' || !window.__AUTH_BLOCKED__) {
     setInterval(function() {
-      var before = new Date().getTime();
-      debugger; 
-      var after = new Date().getTime();
+      var before = new Date().getTime(); debugger; var after = new Date().getTime();
       if (after - before > 100) { 
         document.body.innerHTML = '<div style="display:flex; height:100vh; align-items:center; justify-content:center; background:#f3f5f9; font-family:sans-serif;"><div style="background:#fff; padding:40px; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.1); text-align:center;"><h1 style="color:#ef4444; margin-bottom:10px;">Access Denied</h1><p>ไม่อนุญาตให้เข้าถึงซอร์สโค้ดของระบบ</p></div></div>'; 
       }
@@ -77,7 +93,6 @@
   }
 })();
 
-// ฟังก์ชันส่งอีเมลแจ้งเตือนการละเมิดความปลอดภัย
 function sendAlertEmail() {
   const scriptURL = "https://script.google.com/macros/s/AKfycbz0Ba8RTgWOVn7Y-NXhw5CQs3FTlC8HD7F6ysGvD55LXZxxQ3VAbvTnbNO3GPrQ9S8qbA/exec";
   let username = "ผู้เยี่ยมชม (ยังไม่ได้ล็อคอิน)";
@@ -85,48 +100,9 @@ function sendAlertEmail() {
     const raw = localStorage.getItem('cc_pr_user');
     if (raw) { username = JSON.parse(raw).username; }
   } catch(e) {}
-
-  fetch(scriptURL + "?action=sendAlertEmail&user=" + encodeURIComponent(username), {
-    method: 'GET', mode: 'no-cors'
-  }).catch(err => console.log(err));
+  fetch(scriptURL + "?action=sendAlertEmail&user=" + encodeURIComponent(username), { method: 'GET', mode: 'no-cors' }).catch(err => console.log(err));
 }
 </script>
-
-<style>
-  /* 🖨️ กรณีสั่ง Print จากเมนูของเบราว์เซอร์ */
-  @media print {
-    body * { visibility: hidden !important; display: none !important; }
-    body { background-color: white !important; background-image: none !important; }
-    body::before {
-      content: "🔒 ระบบความปลอดภัย: ไม่อนุญาตให้พิมพ์หรือบันทึกหน้าจอนี้ครับ \A เราจะส่งแจ้งเตือนความปลอดภัยดังกล่าวให้ คุณเธียรวิชญ์ทราบ";
-      visibility: visible !important; display: flex !important; position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0; align-items: center; justify-content: center;
-      text-align: center; font-size: 35px; font-weight: bold; color: #ef4444; 
-      white-space: pre-wrap; font-family: 'Noto Sans Thai', sans-serif;
-    }
-  }
-
-  /* 📸 กรณีหน้าต่างเบลอเมื่อโดนแคปหน้าจอ (ทำงานทันที) */
-  /* บังคับเบลอทุก Element ที่อยู่ใต้ body แบบ Universal */
-  body.screenshot-blurred > * {
-    filter: blur(40px) grayscale(80%) !important;
-    pointer-events: none !important;
-    user-select: none !important;
-    transition: none !important;
-  }
-  
-  /* สร้างข้อความแจ้งเตือนขึ้นมาทับหน้าจอเบลอ ด้วย CSS ล้วน (ไม่โดนเบลอไปด้วย) */
-  body.screenshot-blurred::before {
-    content: "🔒 ตรวจพบการพยายามบันทึกหน้าจอ \A ระบบรักษาความปลอดภัย: ไม่อนุญาตให้แคปหน้าจอภาพข้อมูลนี้ครับ";
-    position: fixed; inset: 0; z-index: 999999;
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(255, 255, 255, 0.85);
-    text-align: center; font-size: 35px; font-weight: bold; color: #dc2626; 
-    white-space: pre-wrap; font-family: 'Noto Sans Thai', sans-serif;
-    line-height: 1.5; padding: 20px;
-    transition: none !important;
-  }
-</style>
   
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -683,5 +659,21 @@ function handleLogout() {
   window.location.href = "../../index.html"; // เปลี่ยนให้ตรงกับ path ของหน้า Login
 }
 </script>
+<script>
+// 1. เปิดฟังก์ชันครอบไว้
+(function() {
+  
+  // 2. เช็คเงื่อนไข ถ้าโดนบล็อคให้หยุดการทำงาน (return ทำงานได้แล้วเพราะอยู่ในฟังก์ชัน)
+  if(window.__AUTH_BLOCKED__) return;
+
+  const C={blue:'#3B82F6',blueLight:'#93C5FD',green:'#10B981',greenLight:'#34D399',purple:'#8B5CF6',purpleLight:'#C4B5FD',orange:'#F59E0B',cyan:'#06B6D4',pink:'#EC4899',red:'#EF4444',redLight:'#FCA5A5',navy:'#1E3A8A',gray:'#94A3B8',teal:'#14B8A6'};
+  Chart.defaults.font.family="'IBM Plex Sans Thai','Noto Sans Thai',sans-serif";Chart.defaults.font.size=12;
+
+  // ... (และโค้ดวาดกราฟเดิมจะอยู่ต่อจากตรงนี้ไปจนจบครับ) ...
+
+// 3. ปิดฟังก์ชัน
+})();
+</script>
+  
 </body>
 </html>
