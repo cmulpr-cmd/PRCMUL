@@ -37,7 +37,7 @@
     }
   });
 
-  // 3. วางกับดัก Debugger Loop
+  // 3. วางกับดัก Debugger Loop (คงเดิม)
   setInterval(function() {
     var before = new Date().getTime();
     debugger; 
@@ -50,10 +50,13 @@
   </script>
 
   <style>
+    /* ============================================================
+       🎨 ส่วนการแสดงผล (ปรับเฉพาะสีพื้นหลังและกรอบใส)
+       ============================================================ */
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Noto Sans Thai', sans-serif; }
     
     body {
-      /* 1. เปลี่ยนสีพื้นหลังเป็นม่วงชมพู gradient ไม่สว่างจ้าและไม่มืด */
+      /* ปรับจุดที่ 1: สีพื้นหลังเป็นม่วงชมพู gradient โทนกลาง (ไม่มืดและไม่สว่างจ้า) */
       background: linear-gradient(135deg, #a78bfa 0%, #f472b6 100%);
       min-height: 100vh;
       display: flex;
@@ -63,28 +66,46 @@
     }
 
     .login-card {
-      /* 2. ทำกรอบใสแบบกระจก (Glassmorphism) */
-      background: rgba(255, 255, 255, 0.55);
-      backdrop-filter: blur(12px);
+      /* ปรับจุดที่ 2: ทำกรอบใสแบบกระจก (Glassmorphism) */
+      background: rgba(255, 255, 255, 0.55); /* พื้นหลังสีขาวโปร่งแสง */
+      backdrop-filter: blur(12px); /* เอฟเฟกต์เบลอพื้นหลัง */
       -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.7); /* เส้นขอบใส */
       
       width: 100%;
       max-width: 440px;
       border-radius: 24px;
       padding: 48px 40px;
-      box-shadow: 0 25px 60px rgba(0,0,0,0.1);
+      box-shadow: 0 25px 60px rgba(0,0,0,0.1); /* เงาบางๆ */
       position: relative;
       overflow: hidden;
       transition: all 0.4s ease;
     }
 
-    /* ----------------------------------------------------
-       ส่วนที่เหลือด้านล่างนี้ไม่มีการเปลี่ยนแปลง (ตามที่คุณขอ)
-       ---------------------------------------------------- */
+    /* --- ส่วนการแสดงผลอื่นๆ คงเดิมทุกประการ --- */
     .login-card.success-mode { padding: 60px 40px; text-align: center; }
     .header-area { text-align: center; margin-bottom: 32px; transition: opacity 0.3s; }
-    .logo-box { width: 72px; height: 72px; background: linear-gradient(135deg, #3b82f6, #6366f1); border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 32px; font-weight: 900; margin: 0 auto 20px; box-shadow: 0 10px 20px rgba(59,130,246,0.3); transform: rotate(-5deg); }
+    
+    /* แก้ไขส่วนโลโก้: เปลี่ยนจากตัวหนังสือเป็น tag <img> สำหรับใส่รูปภาพ */
+    .logo-box { 
+      width: 72px; 
+      height: 72px; 
+      background: linear-gradient(135deg, #3b82f6, #6366f1); 
+      border-radius: 20px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      margin: 0 auto 20px; 
+      box-shadow: 0 10px 20px rgba(59,130,246,0.3); 
+      transform: rotate(-5deg); 
+      overflow: hidden; /* บังคับให้รูปอยู่ในกรอบ */
+    }
+    .logo-box img {
+      max-width: 100%; /* ปรับขนาดรูปให้พอดีกรอบ */
+      height: auto;
+      display: block;
+    }
+
     .title { font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px; letter-spacing: -0.5px; }
     .subtitle { color: #64748b; font-size: 14px; font-weight: 500; }
     
@@ -107,7 +128,7 @@
 
     .footer-note { text-align: center; margin-top: 32px; font-size: 12px; color: #94a3b8; font-weight: 500; }
 
-    /* Success State */
+    /* Success State (คงเดิม) */
     .success-content { display: none; opacity: 0; transition: opacity 0.5s; }
     .success-content.show { display: block; opacity: 1; }
     .check-icon { width: 80px; height: 80px; background: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; color: #fff; font-size: 40px; box-shadow: 0 10px 25px rgba(16,185,129,0.3); animation: scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -131,7 +152,9 @@
   
   <form id="loginForm" onsubmit="return handleLogin(event)">
     <div class="header-area">
-      <div class="logo-box">PR</div>
+      <div class="logo-box">
+        <img src="your-logo.png" alt="PR Logo"> 
+      </div>
       <h1 class="title">เข้าสู่ระบบ</h1>
       <p class="subtitle">ระบบ Dashboard สรุปผลการดำเนินงาน<br>หน่วยสื่อสารองค์กร สำนักหอสมุด</p>
     </div>
@@ -166,12 +189,14 @@
 </div>
 
 <script>
+  // ข้อมูลบัญชีผู้ใช้ (คงเดิม)
   const accounts = {
     "admin":   { password: "password", displayName: "ผู้ปฏิบัติงาน", role: "admin", roleLabel: "หน่วยสื่อสารองค์กร" },
     "manager": { password: "123", displayName: "หัวหน้าฝ่าย", role: "manager", roleLabel: "ผู้บริหาร" },
     "viewer":  { password: "abc", displayName: "ผู้เยี่ยมชม", role: "viewer", roleLabel: "ผู้เยี่ยมชม" }
   };
 
+  // ฟังก์ชันจัดการการเข้าสู่ระบบ (คงเดิม)
   function handleLogin(e) {
     e.preventDefault();
     const uname = document.getElementById("uname").value.trim();
@@ -182,9 +207,10 @@
     error.classList.remove('show');
     btn.classList.add('loading');
 
-    // Simulate API delay
+    // Simulate API delay (คงเดิม)
     setTimeout(() => {
       if (accounts[uname] && accounts[uname].password === psw) {
+          // สำเร็จ (คงเดิม)
           const acc = accounts[uname];
           
           const sessionData = {
@@ -197,6 +223,7 @@
           localStorage.setItem('cc_pr_user', JSON.stringify(sessionData));
           localStorage.setItem('cc_pr_lastActivity', Date.now().toString());
 
+          // เปลี่ยนหน้าตาเป็นสำเร็จ (คงเดิม)
           document.getElementById('loginForm').style.display = 'none';
           document.getElementById('loginCard').classList.add('success-mode');
           
@@ -218,10 +245,16 @@
           msg.textContent = `กำลังพาคุณไปหน้า Dashboard ใน ${count} วินาที...`;
           let timer = setInterval(() => {
             count--;
-            if (count <= 0) { clearInterval(timer); goToDashboard(); }
-            else { msg.textContent = `กำลังพาคุณไปหน้า Dashboard ใน ${count} วินาที...`; }
+            if (count <= 0) {
+              clearInterval(timer);
+              goToDashboard();
+            } else {
+              msg.textContent = `กำลังพาคุณไปหน้า Dashboard ใน ${count} วินาที...`;
+            }
           }, 1000);
+
         } else {
+          // ผิดพลาด (คงเดิม)
           error.textContent = "ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง";
           btn.classList.remove('loading');
           error.classList.add('show');
@@ -230,8 +263,11 @@
     return false;
   }
 
-  function goToDashboard() { window.location.href = 'dashboard.html'; }
+  function goToDashboard() {
+    window.location.href = 'dashboard.html';
+  }
 
+  // ตรวจสอบเซสชั่นเดิม (คงเดิม)
   (function checkLogin() {
     try {
       const raw = localStorage.getItem('cc_pr_user');
