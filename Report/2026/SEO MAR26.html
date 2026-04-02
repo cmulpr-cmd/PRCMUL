@@ -5,7 +5,7 @@
 (function(){
   var allowed = false;
   var TIMEOUT_MS = 30 * 60 * 1000; // ตั้งค่าหมดอายุการใช้งาน 30 นาที
-  var loginPageUrl = "../index.html"; // ตำแหน่งของหน้า Login (ปรับจุด .. ให้ตรงกับโฟลเดอร์)
+  var loginPageUrl = "../../index.html"; // ตำแหน่งของหน้า Login (ปรับจุด .. ให้ตรงกับโฟลเดอร์)
 
   try {
     var raw = localStorage.getItem('cc_pr_user');
@@ -345,7 +345,7 @@
 
 <nav class="back-bar">
   <div style="display: flex; align-items: center; gap: 16px;">
-    <a href="../dashboard.html" class="back-btn">← กลับหน้าหลัก</a>
+    <a href="../../dashboard.html" class="back-btn">← กลับหน้าหลัก</a>
     <span class="back-bar-title" style="text-align: left;">หน่วยสื่อสารองค์กร<br>สำนักหอสมุด</span>
   </div>
   
@@ -615,7 +615,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function handleLogout() {
   localStorage.removeItem("cc_pr_user");
   localStorage.removeItem("cc_pr_lastActivity");
-  window.location.href = "../index.html"; // เปลี่ยนให้ตรงกับ path ของหน้า Login
+  window.location.href = "../../index.html"; // เปลี่ยนให้ตรงกับ path ของหน้า Login
 }
 </script>
 </body>
