@@ -1,6 +1,67 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+  <script>
+(function(){
+  var allowed = false;
+  var TIMEOUT_MS = 30 * 60 * 1000; // ตั้งค่าหมดอายุการใช้งาน 30 นาที
+  var loginPageUrl = "../index.html"; // ตำแหน่งของหน้า Login (ปรับจุด .. ให้ตรงกับโฟลเดอร์)
+
+  try {
+    var raw = localStorage.getItem('cc_pr_user');
+    if(raw) {
+      var user = JSON.parse(raw);
+      if(user.username && user.displayName && user.role && user.loggedInAt) {
+        // เช็คว่าล็อคอินมาเกิน 24 ชม. หรือยัง
+        if(Date.now() - new Date(user.loggedInAt).getTime() < 24 * 60 * 60 * 1000) {
+          var lastAct = localStorage.getItem('cc_pr_lastActivity');
+          // เช็ค Inactivity Timeout (ไม่มีการขยับเมาส์/เลื่อนจอเกินกำหนด)
+          if(lastAct && (Date.now() - parseInt(lastAct, 10)) > TIMEOUT_MS) {
+            localStorage.removeItem('cc_pr_user');
+            localStorage.removeItem('cc_pr_lastActivity');
+          } else {
+            // อัปเดตเวลาใช้งานล่าสุด และอนุญาตให้เข้าถึงได้
+            localStorage.setItem('cc_pr_lastActivity', Date.now().toString());
+            allowed = true;
+          }
+        } else {
+          localStorage.removeItem('cc_pr_user');
+          localStorage.removeItem('cc_pr_lastActivity');
+        }
+      }
+    }
+  } catch(e) {}
+
+  if(!allowed) {
+    // 1. ซ่อนเนื้อหาเพจทันทีก่อนที่เบราว์เซอร์จะวาดกราฟ (ป้องกันการแอบเห็นข้อมูล)
+    document.write('<style>html { display: none !important; }</style>');
+    
+    // 2. เมื่อโหลดโครงสร้างเสร็จ ให้แสดงหน้า Access Denied ทับเนื้อหาทั้งหมด
+    document.addEventListener('DOMContentLoaded', function(){
+      document.documentElement.style.display = 'block';
+      document.body.innerHTML = 
+        '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f3f5f9;font-family:\'Noto Sans Thai\',sans-serif;margin:0;"><div style="background:#fff;border-radius:24px;padding:48px 40px;text-align:center;max-width:440px;width:90%;box-shadow:0 25px 60px rgba(0,0,0,0.05); border-top: 5px solid #ef4444;"><div style="font-size: 48px; margin-bottom: 12px;">🔒</div><h1 style="font-size:28px;font-weight:900;margin-bottom:12px;background:linear-gradient(135deg, #ef4444, #991b1b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:inline-block;">Access Denied</h1><p style="color:#475569;font-size:15px;line-height:1.6;margin-bottom:28px;font-weight:500;">ท่านไม่มีสิทธิ์เข้าถึงรายงานฉบับนี้ หรือเซสชันหมดอายุ<br>กรุณาเข้าสู่ระบบใหม่อีกครั้ง</p><a href="' + loginPageUrl + '" style="display:inline-block;padding:12px 36px;border-radius:12px;background:linear-gradient(135deg, #7c3aed, #2563eb);color:#fff;text-decoration:none;font-weight:700;font-size:15px;box-shadow:0 8px 20px rgba(124,58,237,0.25); transition:transform 0.2s;">กลับไปหน้าเข้าสู่ระบบ</a></div></div>';
+    });
+  } else {
+    // === อนุญาตให้เข้าถึงได้ ===
+    // 1. ติดตามการเคลื่อนไหวเพื่อต่ออายุเซสชัน
+    function updateActivity(){ localStorage.setItem('cc_pr_lastActivity', Date.now().toString()); }
+    const events = ['mousemove','mousedown','keydown','scroll','touchstart','click'];
+    events.forEach(ev => window.addEventListener(ev, updateActivity, { passive: true }));
+    
+    // 2. ตรวจสอบเซสชันทุก 10 วินาที (เตะออกหากปล่อยทิ้งไว้ในหน้า Report นานเกินไป)
+    const checker = setInterval(() => {
+      const last = parseInt(localStorage.getItem('cc_pr_lastActivity') || '0', 10);
+      if (Date.now() - last > TIMEOUT_MS) {
+        clearInterval(checker);
+        localStorage.removeItem('cc_pr_user');
+        localStorage.removeItem('cc_pr_lastActivity');
+        window.location.href = loginPageUrl;
+      }
+    }, 10000);
+  }
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>CMUL Facebook Page Report - มีนาคม 2569</title>
