@@ -6,17 +6,23 @@
   // 1. บล็อคการคลิกขวา
   document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
-  let captureTriggered = false;
+  let isLocked = false;
 
   // ฟังก์ชันควบคุมการเบลอหน้าจอ
-  function lockScreen() { document.body.classList.add('screenshot-blurred'); }
-  function unlockScreen() { 
-    if (!captureTriggered) {
+  function lockScreen() { 
+    isLocked = true;
+    document.body.classList.add('screenshot-blurred'); 
+  }
+  
+  // ฟังก์ชันปลดล็อคแบบหน่วงเวลา 3 วินาที
+  function unlockScreenDelayed() { 
+    setTimeout(function() {
+      isLocked = false;
       document.body.classList.remove('screenshot-blurred'); 
-    }
+    }, 3000); 
   }
 
-  // 2. ดักปุ่มลัดต่างๆ และดักการแคปหน้าจอ
+  // 2. ดักปุ่มลัดต่างๆ และดักการกดปริ้น / แคปจอ
   document.addEventListener('keydown', function(e) {
     if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) { e.preventDefault(); return false; }
@@ -25,48 +31,40 @@
     
     // 🖨️ ดักจับการกดปุ่มสั่งปริ้น (Ctrl+P หรือ Cmd+P)
     if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P' || e.keyCode === 80)) {
-      e.preventDefault(); 
+      e.preventDefault();
       alert("🔒 ระบบความปลอดภัย: ไม่อนุญาตให้พิมพ์หรือบันทึกหน้าจอนี้ครับ\nเราจะส่งแจ้งเตือนความปลอดภัยดังกล่าวให้คุณเธียรวิชญ์ทราบ");
       sendAlertEmail();
       return false;
     }
 
-    // 🚀 3.1 ท่าไม้ตาย: ดักกด Start (Meta) + Shift ค้างไว้ ให้เบลอรอเลย (ก่อนที่จะกด S ทัน) 
-    // โดยที่ถ้ากด Start ตัวเดียวจะยังไม่เบลอ
-    if (e.metaKey && e.shiftKey) {
-      lockScreen();
-    }
-
-    // 📸 3.2 ดักจับการยืนยันการแคปจอ (Win+Shift+S, Cmd+Shift+3/4/5 หรือกด PrintScreen เพียวๆ ทันที)
+    // 📸 ดักจับการยืนยันการแคปจอ (Win+Shift+S, Cmd+Shift+3/4/5 หรือ PrintScreen)
     if (
       e.key === 'PrintScreen' || e.keyCode === 44 || 
       (e.metaKey && e.shiftKey && (e.key === 's' || e.key === 'S')) || 
       (e.metaKey && e.shiftKey && ['3','4','5'].includes(e.key))
     ) {
-      e.preventDefault();
-      captureTriggered = true; // ล็อคสถานะไว้ไม่ให้ปุ่มอื่นมาปลดเบลอ
       lockScreen();
       
-      // ล้างคลิปบอร์ด ป้องกันการแคปติดไป
+      // ล้างรูปในคลิปบอร์ดทิ้ง (สู้กับคนที่กด PrintScreen)
       if(navigator.clipboard) {
          navigator.clipboard.writeText("🔒 ไม่อนุญาตให้แคปหน้าจอจากระบบ PR CMUL").catch(err => {});
       }
 
-      alert("🔒 ระบบความปลอดภัย: ไม่อนุญาตให้แคปหน้าจอหรือบันทึกภาพครับ\nเราจะส่งแจ้งเตือนให้คุณเธียรวิชญ์ทราบ");
       sendAlertEmail();
-      
-      // คลายเบลอหลังจากแจ้งเตือน 3 วินาที
-      setTimeout(() => {
-        captureTriggered = false;
-        unlockScreen();
-      }, 3000);
+      unlockScreenDelayed(); // สั่งให้รอ 3 วิก่อนคลายเบลอ
     }
   });
 
-  // ปลดเบลอเมื่อปล่อยปุ่ม Shift หรือ Start (ถ้าเปลี่ยนใจไม่แคปแล้ว)
-  document.addEventListener('keyup', function(e) {
-    if (e.key === 'Shift' || e.key === 'Meta' || e.key === 'OS' || e.key === 'PrintScreen' || e.keyCode === 44) {
-      unlockScreen();
+  // 3. ท่าไม้ตายสำหรับสู้กับ Snipping Tool (Win+Shift+S)
+  // เวลาเครื่องมือแคปจอเด้งขึ้นมา หน้าเว็บจะเสีย Focus เราจะสั่งเบลอทันที
+  window.addEventListener('blur', function() {
+    lockScreen();
+  });
+  
+  // พอผู้ใช้กลับมาคลิกที่หน้าเว็บ (แคปเสร็จแล้ว หรือเปลี่ยนใจ) สั่งหน่วง 3 วินาทีค่อยปลดเบลอ
+  window.addEventListener('focus', function() {
+    if(isLocked) {
+      unlockScreenDelayed();
     }
   });
 
@@ -81,7 +79,7 @@
   }
 })();
 
-// ฟังก์ชันส่งอีเมลแจ้งเตือนการละเมิดความปลอดภัย
+// ฟังก์ชันส่งอีเมลแจ้งเตือน
 function sendAlertEmail() {
   const scriptURL = "https://script.google.com/macros/s/AKfycbz0Ba8RTgWOVn7Y-NXhw5CQs3FTlC8HD7F6ysGvD55LXZxxQ3VAbvTnbNO3GPrQ9S8qbA/exec";
   let username = "ผู้เยี่ยมชม (ยังไม่ได้ล็อคอิน)";
@@ -91,14 +89,12 @@ function sendAlertEmail() {
   } catch(e) {}
 
   fetch(scriptURL + "?action=sendAlertEmail&user=" + encodeURIComponent(username), {
-    method: 'GET',
-    mode: 'no-cors'
+    method: 'GET', mode: 'no-cors'
   }).catch(err => console.log(err));
 }
 </script>
 
 <style>
-  /* CSS เพิ่มเติม: กรณีเขากดปริ้นจากเมนูของเบราว์เซอร์โดยไม่ใช้คีย์บอร์ด */
   @media print {
     body * { visibility: hidden !important; display: none !important; }
     body { background-color: white !important; background-image: none !important; }
@@ -111,28 +107,15 @@ function sendAlertEmail() {
   }
 
   /* =========================================
-     CSS สำหรับหน้าต่างเบลอเมื่อโดนแคปหน้าจอ (ทำงานทันที)
+     CSS เบลอหน้าจอ ทำงานแบบรวดเร็ว ไม่มี Transition ขัดขวาง
      ========================================= */
   body.screenshot-blurred #root,
   body.screenshot-blurred .bg-scene {
-    filter: blur(30px) grayscale(50%) !important;
+    filter: blur(40px) grayscale(80%) !important;
     pointer-events: none !important;
     user-select: none !important;
-    transition: none !important; /* ไม่มีดีเลย์ เพื่อหนีระบบปฏิบัติการให้ทัน */
+    transition: none !important; 
   }
-  .anti-screenshot-msg {
-    position: fixed; inset: 0; z-index: 999999;
-    display: flex; align-items: center; justify-content: center; flex-direction: column;
-    background: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-    opacity: 0; pointer-events: none; transition: none !important;
-    text-align: center;
-  }
-  body.screenshot-blurred .anti-screenshot-msg {
-    opacity: 1; pointer-events: all;
-  }
-  .anti-screenshot-msg h1 { font-size: 32px; color: #dc2626; margin-bottom: 10px; font-family: 'Noto Sans Thai', sans-serif; font-weight: 900;}
-  .anti-screenshot-msg p { font-size: 18px; color: #1a1d2e; font-family: 'Sarabun', sans-serif; font-weight: 600;}
 </style>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
