@@ -1,56 +1,92 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <script>
+<script>
 (function() {
   // 1. บล็อคการคลิกขวา
-  document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-  });
+  document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
-  // 2. บล็อคปุ่มลัดที่ใช้เปิด DevTools (F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U)
+  // 2. บล็อคปุ่มลัดต่างๆ และดักการกดปริ้น (Ctrl+P)
   document.addEventListener('keydown', function(e) {
-    // F12
-    if (e.key === 'F12' || e.keyCode === 123) {
-      e.preventDefault();
-      return false;
-    }
-    // Ctrl+Shift+I หรือ Mac (Cmd+Option+I)
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) {
-      e.preventDefault();
-      return false;
-    }
-    // Ctrl+Shift+J หรือ Mac (Cmd+Option+J)
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) {
-      e.preventDefault();
-      return false;
-    }
-    // Ctrl+U (View Source)
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) {
-      e.preventDefault();
+    if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) { e.preventDefault(); return false; }
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) { e.preventDefault(); return false; }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) { e.preventDefault(); return false; }
+    
+    // 🖨️ ดักจับการกดปุ่มสั่งปริ้น (Ctrl+P หรือ Cmd+P)
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P' || e.keyCode === 80)) {
+      e.preventDefault(); // หยุดการทำงานของคำสั่งปริ้น
+      
+      // แสดงข้อความแจ้งเตือน 2 บรรทัด
+      alert("🔒 ระบบความปลอดภัย: ไม่อนุญาตให้พิมพ์หรือบันทึกหน้าจอนี้ครับ\nเราจะส่งแจ้งเตือนความปลอดภัยดังกล่าวให้คุณเธียรวิชญ์ทราบ");
+
+      // ส่งคำสั่งเบื้องหลังไปยัง Google Apps Script เพื่อส่งอีเมล
+      sendAlertEmail();
+      
       return false;
     }
   });
 
-  // 3. วางกับดัก Debugger Loop 
-  // หากมีการเปิด DevTools ทิ้งไว้ คำสั่ง debugger จะทำงานและทำให้สคริปต์หยุดชะงัก
-  // เราจะเช็คเวลาที่หายไป ถ้าหยุดชะงักนานผิดปกติ แปลว่าโดนแอบดูโค้ด ให้เตะออกทันที
+  // 3. วางกับดัก Debugger Loop
   if (!window.__AUTH_BLOCKED__) {
     setInterval(function() {
       var before = new Date().getTime();
-      // คำสั่งนี้จะหยุดการทำงานของเว็บทันทีที่มีคนเปิดหน้าต่าง DevTools
       debugger; 
       var after = new Date().getTime();
-      
-      // ถ้าเวลาห่างกันเกิน 100ms แปลว่าติด Debugger (เปิด DevTools อยู่)
-      if (after - before > 100) {
-        document.body.innerHTML = ''; // ล้างหน้าจอทิ้ง
-        window.location.replace("../../index.html"); // ดีดกลับหน้าล็อคอิน
-      }
-    }, 1000); // เช็คทุกๆ 1 วินาที
+      if (after - before > 100) { document.body.innerHTML = '<div style="text-align:center;padding:50px;font-family:sans-serif;"><h1>Access Denied</h1></div>'; }
+    }, 1000);
   }
 })();
+
+// ฟังก์ชันส่งอีเมลแจ้งเตือนการละเมิดความปลอดภัย
+function sendAlertEmail() {
+  // ลิงก์ Google Apps Script ของคุณที่ใช้รัน API
+  const scriptURL = "https://script.google.com/macros/s/AKfycbz0Ba8RTgWOVn7Y-NXhw5CQs3FTlC8HD7F6ysGvD55LXZxxQ3VAbvTnbNO3GPrQ9S8qbA/exec";
+  // https://script.google.com/macros/s/AKfycbz0Ba8RTgWOVn7Y-NXhw5CQs3FTlC8HD7F6ysGvD55LXZxxQ3VAbvTnbNO3GPrQ9S8qbA/exec
+  
+  // เก็บข้อมูลว่าใครเป็นคนพยายามปริ้น (ดึงจาก LocalStorage ถ้าล็อคอินอยู่)
+  let username = "ผู้เยี่ยมชม (ยังไม่ได้ล็อคอิน)";
+  try {
+    const raw = localStorage.getItem('cc_pr_user');
+    if (raw) { username = JSON.parse(raw).username; }
+  } catch(e) {}
+
+  // ส่งข้อมูลไปให้ Google Apps Script ส่งอีเมล
+  fetch(scriptURL + "?action=sendAlertEmail&user=" + encodeURIComponent(username), {
+    method: 'GET',
+    mode: 'no-cors' // ส่งไปเงียบๆ ไม่ต้องรอผลลัพธ์เพื่อไม่ให้กระทบผู้ใช้
+  }).catch(err => console.log(err));
+}
 </script>
+
+<style>
+  /* CSS เพิ่มเติม: กรณีเขากดปริ้นจากเมนูของเบราว์เซอร์โดยไม่ใช้คีย์บอร์ด */
+  @media print {
+    body * {
+      visibility: hidden !important;
+      display: none !important;
+    }
+    body {
+      background-color: white !important;
+      background-image: none !important;
+    }
+    body::before {
+      content: "🔒 ระบบความปลอดภัย: ไม่อนุญาตให้พิมพ์หรือบันทึกหน้าจอนี้ครับ เราจะส่งแจ้งเตือนความปลอดภัยดังกล่าวให้ คุณเธียรวิชญ์ทราบ";
+      visibility: visible !important;
+      display: block !important;
+      position: absolute;
+      top: 100px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 35px;
+      font-weight: bold;
+      color: #ef4444;
+      white-space: pre-line;
+      font-family: 'Noto Sans Thai', sans-serif;
+    }
+  }
+</style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PR DASHBOARD-LOGIN</title>
