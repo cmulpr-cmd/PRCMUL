@@ -1,385 +1,335 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เข้าสู่ระบบ - PR CMUL Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <script>
 (function() {
-  // 1. บล็อคการคลิกขวา
-  document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-  });
-
-  // 2. บล็อคปุ่มลัดที่ใช้เปิด DevTools (F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U)
+  document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
   document.addEventListener('keydown', function(e) {
-    // F12
-    if (e.key === 'F12' || e.keyCode === 123) {
-      e.preventDefault();
-      return false;
-    }
-    // Ctrl+Shift+I หรือ Mac (Cmd+Option+I)
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) {
-      e.preventDefault();
-      return false;
-    }
-    // Ctrl+Shift+J หรือ Mac (Cmd+Option+J)
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) {
-      e.preventDefault();
-      return false;
-    }
-    // Ctrl+U (View Source)
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) {
-      e.preventDefault();
-      return false;
-    }
+    if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) { e.preventDefault(); return false; }
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) { e.preventDefault(); return false; }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) { e.preventDefault(); return false; }
   });
-
-  // 3. วางกับดัก Debugger Loop 
-  // หากมีการเปิด DevTools ทิ้งไว้ คำสั่ง debugger จะทำงานและทำให้สคริปต์หยุดชะงัก
-  // เราจะเช็คเวลาที่หายไป ถ้าหยุดชะงักนานผิดปกติ แปลว่าโดนแอบดูโค้ด ให้เตะออกทันที
-  if (!window.__AUTH_BLOCKED__) {
-    setInterval(function() {
-      var before = new Date().getTime();
-      // คำสั่งนี้จะหยุดการทำงานของเว็บทันทีที่มีคนเปิดหน้าต่าง DevTools
-      debugger; 
-      var after = new Date().getTime();
-      
-      // ถ้าเวลาห่างกันเกิน 100ms แปลว่าติด Debugger (เปิด DevTools อยู่)
-      if (after - before > 100) {
-        document.body.innerHTML = ''; // ล้างหน้าจอทิ้ง
-        window.location.replace("../../index.html"); // ดีดกลับหน้าล็อคอิน
-      }
-    }, 1000); // เช็คทุกๆ 1 วินาที
-  }
+  setInterval(function() {
+    var before = new Date().getTime();
+    debugger; 
+    var after = new Date().getTime();
+    if (after - before > 100) { document.body.innerHTML = '<div style="text-align:center;padding:50px;font-family:sans-serif;"><h1>Access Denied</h1></div>'; }
+  }, 1000);
 })();
-</script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PR DASHBOARD-LOGIN</title>
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #f0f4ff;
-    --surface: #ffffff;
-    --primary: #7c3aed;
-    --primary-gradient: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
-    --text: #1a1d2e;
-    --text-muted: #5a6178;
-    --border: rgba(0, 0, 0, 0.06);
-    --input-focus: rgba(124, 58, 237, 0.15);
-    --success: #059669;
-    --error: #dc2626;
-  }
+  </script>
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  
-  body {
-    font-family: 'Sarabun', 'Kanit', sans-serif;
-    /* --- เปลี่ยนสีพื้นหลังตรงนี้ เป็นแบบ Gradient ขยับได้ โทนม่วง-ชมพู --- */
-    background: linear-gradient(-45deg, #a855f7, #ec4899, #8b5cf6, #d946ef);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
+  <style>
+    /* ============================================================
+       🎨 ส่วนการแสดงผล
+       ============================================================ */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Noto Sans Thai', sans-serif; }
     
-    color: var(--text);
-    min-height: 100vh;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden; position: relative;
-  }
+    body {
+      /* ปรับสีพื้นหลังให้มืดลงอีกนิด เป็นโทนม่วงเข้ม-ชมพูอมแดง (Jewel tones) */
+      background: linear-gradient(-45deg, #6b21a8, #be185d, #5b21b6, #9d174d);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
 
-  /* อนิเมชั่นให้พื้นหลัง Gradient ขยับไปมา */
-  @keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
 
-  /* Animated Background Blobs */
-  .bg-scene { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-  .bg-scene::before {
-    content: ''; position: absolute; top: -10%; left: -10%; width: 50%; height: 50%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
-    animation: drift 15s ease-in-out infinite;
-  }
-  .bg-scene::after {
-    content: ''; position: absolute; bottom: -10%; right: -10%; width: 50%; height: 50%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-    animation: drift 18s ease-in-out infinite reverse;
-  }
-  @keyframes drift { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(5%, 5%) scale(1.1); } }
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
 
-  .login-container { position: relative; z-index: 1; width: 100%; max-width: 420px; padding: 20px; animation: slideUp 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
-  @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    /* Animated Background Blobs (ปรับความสว่างลงนิดหน่อยให้เข้ากับพื้นหลังที่มืดลง) */
+    .bg-scene { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .bg-scene::before {
+      content: ''; position: absolute; top: -10%; left: -10%; width: 50%; height: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+      animation: drift 15s ease-in-out infinite;
+    }
+    .bg-scene::after {
+      content: ''; position: absolute; bottom: -10%; right: -10%; width: 50%; height: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+      animation: drift 18s ease-in-out infinite reverse;
+    }
+    @keyframes drift { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(5%, 5%) scale(1.1); } }
 
-  .login-card {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 28px; padding: 45px 35px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
-  }
+    /* กรอบล็อคอินสีขาวทึบ (คงเดิมตามที่คุณขอ) */
+    .login-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 24px;
+      padding: 40px 32px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      position: relative;
+      text-align: center;
+      z-index: 1;
+    }
 
-  .brand { text-align: center; margin-bottom: 35px; }
-  .brand-logo {
-    width: 60px; height: 60px; background: var(--primary-gradient);
-    border-radius: 18px; display: inline-flex; align-items: center; justify-content: center;
-    margin-bottom: 18px; box-shadow: 0 8px 20px rgba(124, 58, 237, 0.25);
-    color: white; font-weight: 800; font-size: 24px;
-  }
-  .brand h1 { font-size: 1.6rem; font-weight: 700; color: var(--text); letter-spacing: -0.5px; margin-bottom: 5px; }
-  .brand p { color: var(--text-muted); font-size: 0.95rem; }
+    /* องค์ประกอบภาพด้านบน */
+    .illustration-box {
+      margin-bottom: 20px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    /* โลโก้เพจ (วงกลม) */
+    .page-logo {
+      width: 56px;
+      height: 56px;
+      background-color: #38bdf8; 
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      overflow: hidden;
+      border: 3px solid #fff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .page-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-  .form-group { margin-bottom: 20px; }
-  .form-group label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 8px; margin-left: 4px; }
-  
-  .input-wrapper { position: relative; }
-  .input-wrapper input {
-    width: 100%; padding: 14px 16px 14px 46px;
-    background: #fff; border: 1.5px solid var(--border);
-    border-radius: 14px; color: var(--text);
-    font-size: 1rem; outline: none; transition: all 0.3s;
-  }
-  .input-wrapper input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--input-focus); }
-  
-  .input-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; fill: var(--text-muted); pointer-events: none; }
-  
-  .toggle-pass { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; opacity: 0.5; transition: 0.2s; }
-  .toggle-pass:hover { opacity: 1; }
+    /* ข้อความต้อนรับ */
+    .title { 
+      font-size: 22px; 
+      font-weight: 800; 
+      color: #1e293b; 
+      margin-bottom: 4px;
+    }
+    .subtitle { 
+      color: #64748b; 
+      font-size: 13px; 
+      font-weight: 500;
+      line-height: 1.4;
+      margin-bottom: 24px;
+    }
 
-  .login-btn {
-    width: 100%; padding: 16px; background: var(--primary-gradient);
-    border: none; border-radius: 14px; color: white;
-    font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 1.05rem;
-    cursor: pointer; margin-top: 10px; transition: all 0.3s;
-    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
-  }
-  .login-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(37, 99, 235, 0.3); }
-  .login-btn:active { transform: translateY(0); }
+    /* ช่องกรอกข้อมูล */
+    .input-group { margin-bottom: 16px; text-align: left; position: relative; }
+    
+    .input-field { 
+      width: 100%; 
+      padding: 12px 16px 12px 40px; 
+      border: 1px solid #e2e8f0; 
+      border-radius: 12px; 
+      font-size: 14px; 
+      color: #1e293b; 
+      background: #f8fafc; 
+      transition: all 0.2s; 
+      outline: none; 
+    }
+    .input-field:focus { 
+      border-color: #3b82f6; 
+      background: #fff; 
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1); 
+    }
+    
+    /* ไอคอนในช่องกรอกข้อมูล */
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      color: #94a3b8;
+      font-size: 14px;
+    }
 
-  .error-msg { text-align: center; color: var(--error); font-size: 0.85rem; margin-top: 15px; font-weight: 600; display: none; }
-  .error-msg.show { display: block; animation: shake 0.4s ease-in-out; }
-  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+    /* ปุ่มล็อคอิน */
+    .btn-login { 
+      width: 100%; 
+      padding: 14px; 
+      border: none; 
+      border-radius: 12px; 
+      background: #2563eb; 
+      color: #fff; 
+      font-size: 15px; 
+      font-weight: 700; 
+      cursor: pointer; 
+      transition: all 0.3s; 
+      box-shadow: 0 4px 12px rgba(37,99,235,0.2); 
+      margin-top: 8px; 
+    }
+    .btn-login:hover { background: #1d4ed8; }
+    .btn-login.loading { color: transparent; pointer-events: none; position: relative; }
+    .btn-login.loading::after { 
+      content: ''; position: absolute; left: 50%; top: 50%; width: 20px; height: 20px; 
+      margin: -10px 0 0 -10px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; 
+      border-radius: 50%; animation: spin 0.8s linear infinite; 
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-  .footer-text { text-align: center; margin-top: 30px; color: var(--text-muted); font-size: 0.75rem; line-height: 1.5; }
+    .error-msg { 
+      color: #ef4444; font-size: 13px; font-weight: 600; text-align: center; 
+      margin-top: 16px; padding: 10px; background: #fef2f2; border-radius: 8px; 
+      border: 1px solid #fee2e2; display: none; 
+    }
+    .error-msg.show { display: block; animation: shake 0.4s ease; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 
-  /* Success Overlay & Card */
-  .success-overlay {
-    position: fixed; inset: 0; z-index: 100;
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(240, 244, 255, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    opacity: 0; pointer-events: none; transition: opacity 0.5s ease;
-  }
-  .success-overlay.show { opacity: 1; pointer-events: all; }
-  
-  .success-card {
-    background: #fff; border-radius: 28px; padding: 45px 30px; text-align: center;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.1); max-width: 400px; width: 90%;
-    transform: translateY(30px) scale(0.95); transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-  .success-overlay.show .success-card { transform: translateY(0) scale(1); }
+    /* โลโก้มช. ด้านล่าง (Footer Note) */
+    .footer-note { 
+      margin-top: 32px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 8px;
+    }
+    .footer-note img {
+      height: 24px;
+      opacity: 0.7;
+    }
+    .footer-text {
+      font-size: 12px; 
+      color: #64748b; 
+      font-weight: 500;
+      text-align: left;
+      line-height: 1.2;
+    }
 
-  .status-icon-wrap { height: 80px; display: flex; justify-content: center; align-items: center; margin-bottom: 15px; }
+    /* Success State */
+    .success-content { display: none; opacity: 0; transition: opacity 0.5s; padding: 20px 0;}
+    .success-content.show { display: block; opacity: 1; }
+    .check-icon { width: 70px; height: 70px; background: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: #fff; font-size: 32px; box-shadow: 0 10px 25px rgba(16,185,129,0.3); animation: scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    @keyframes scaleUp { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+    .success-title { font-size: 22px; font-weight: 800; color: #1e293b; margin-bottom: 12px; }
+    .user-badge { display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; padding: 8px 16px; border-radius: 50px; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+    
+    .role-badge { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; color: #fff; text-transform: uppercase; }
+    .role-badge.admin { background: #ef4444; }
+    .role-badge.manager { background: #f59e0b; }
+    .role-badge.viewer { background: #3b82f6; }
 
-  .auth-spinner {
-    width: 65px; height: 65px; border: 4px solid #f1f5f9;
-    border-top-color: var(--primary); border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  .check-circle {
-    width: 75px; height: 75px; border-radius: 50%; background: var(--success);
-    display: none; align-items: center; justify-content: center;
-    box-shadow: 0 10px 30px rgba(5, 150, 105, 0.25);
-    animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-  @keyframes popIn { 0% { transform: scale(0); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
-  .check-circle svg { width: 40px; height: 40px; fill: white; }
-
-  .welcome-h2 { font-size: 1.2rem; font-weight: 500; color: var(--text-muted); margin-top: 10px; line-height: 1.4; transition: 0.3s; }
-  .welcome-name { font-size: 1.7rem; font-weight: 700; color: var(--primary); display: block; margin-top: 8px; letter-spacing: -0.5px;}
-  
-  .role-badge {
-    display: inline-block; padding: 6px 18px; border-radius: 20px;
-    font-size: 0.9rem; font-weight: 700; margin-top: 15px;
-  }
-  .role-badge.head { background: rgba(219,39,119,0.1); color: #db2777; }
-  .role-badge.admin { background: rgba(37,99,235,0.1); color: #2563eb; }
-
-  .go-btn {
-    margin-top: 30px; padding: 15px 45px; background: var(--primary-gradient);
-    color: white; text-decoration: none; font-weight: 600; border-radius: 14px;
-    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.2); transition: 0.3s; display: inline-block;
-  }
-  .go-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(124, 58, 237, 0.3); }
-
-  .spinner { width: 22px; height: 22px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; margin: 0 auto; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .login-btn.loading .btn-text { display: none; }
-  .login-btn.loading .spinner { display: block; }
-</style>
+    .redirect-text { color: #64748b; font-size: 13px; font-weight: 500; display: none; }
+  </style>
 </head>
 <body>
 
 <div class="bg-scene"></div>
 
-<div class="login-container">
-  <div class="login-card">
-  <div class="brand">
-    <img src="logo web.png" alt="Logo" style="max-width: 120px; height: auto; margin-bottom: 16px;">
-    <h1>ยินดีต้อนรับ</h1>
-    <p>ระบบDashboard <br>การดำเนินงานหน่วยสื่อสารองค์กร</p>
-</div>
-
-    <form id="loginForm" onsubmit="return handleLogin(event)">
-      <div class="form-group">
-        <label>ชื่อผู้ใช้งาน</label>
-        <div class="input-wrapper">
-          <input type="text" id="username" placeholder="Username" required autocomplete="off">
-          <svg class="input-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>รหัสผ่าน</label>
-        <div class="input-wrapper">
-          <input type="password" id="password" placeholder="Password" required>
-          <svg class="input-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"/></svg>
-          <button type="button" class="toggle-pass" onclick="togglePassword()">
-            <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-          </button>
-        </div>
-      </div>
-
-      <button type="submit" class="login-btn" id="loginBtn">
-        <span class="btn-text">เข้าสู่ระบบ</span>
-        <div class="spinner"></div>
-      </button>
-
-      <div class="error-msg" id="errorMsg">ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง</div>
-    </form>
-
-    <div class="footer-text">
-      หน่วยสื่อสารองค์กร สำนักหอสมุด<br>มหาวิทยาลัยเชียงใหม่
+<div class="login-card" id="loginCard">
+  
+  <form id="loginForm" onsubmit="return handleLogin(event)">
+    
+    <div class="page-logo">
+      <img src="Web logo.png" alt="Logo" onerror="this.style.display='none'; this.parentNode.innerHTML='PR';">
     </div>
-  </div>
-</div>
 
-<div class="success-overlay" id="successOverlay">
-  <div class="success-card">
-    <div class="status-icon-wrap">
-      <div class="auth-spinner" id="authSpinner"></div>
-      
-      <div class="check-circle" id="authCheck">
-        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-      </div>
+    <h1 class="title">ยินดีต้อนรับ</h1>
+    <p class="subtitle">ระบบ Dashboard<br>การดำเนินงานหน่วยสื่อสารองค์กร</p>
+
+    <div class="input-group">
+      <i class="fa-regular fa-user input-icon"></i>
+      <input type="text" id="uname" class="input-field" placeholder="ชื่อผู้ใช้" autocomplete="off" required>
     </div>
     
-    <h2 class="welcome-h2" id="welcomeText">กำลังเข้าสู่ระบบ...</h2>
-    <div class="role-badge" id="roleBadge" style="display: none;"></div>
+    <div class="input-group">
+      <i class="fa-solid fa-lock input-icon"></i>
+      <input type="password" id="psw" class="input-field" placeholder="รหัสผ่าน" required>
+    </div>
     
-    <br>
-    <a href="javascript:void(0)" class="go-btn" id="goBtn" onclick="goToDashboard()" style="display: none;">เข้าสู่ Dashboard →</a>
-    <p style="margin-top: 18px; color: var(--text-muted); font-size: 0.85rem; display: none;" id="redirectMsg"></p>
+    <button type="submit" class="btn-login" id="loginBtn">เข้าสู่ระบบ</button>
+    <div id="errorMsg" class="error-msg"></div>
+    
+    <div class="footer-note">
+      <img src="https://img.icons8.com/color/48/000000/university.png" alt="CMU">
+      <div class="footer-text">สำนักหอสมุด<br>มหาวิทยาลัยเชียงใหม่</div>
+    </div>
+  </form>
+
+  <div class="success-content" id="successContent">
+    <div class="check-icon">✓</div>
+    <h2 class="success-title">เข้าสู่ระบบสำเร็จ</h2>
+    <div class="user-badge">
+      👋 สวัสดี, <span id="displayNameObj"></span> 
+      <span class="role-badge" id="roleBadge"></span>
+    </div>
+    <p class="redirect-text" id="redirectMsg">กำลังพาคุณไปหน้า Dashboard...</p>
   </div>
+
 </div>
 
 <script>
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz0Ba8RTgWOVn7Y-NXhw5CQs3FTlC8HD7F6ysGvD55LXZxxQ3VAbvTnbNO3GPrQ9S8qbA/exec";
-
-  let accounts = {};
-  let accountsLoaded = false;
-
-  (async function loadAccounts() {
-    try {
-      let res = await fetch(SCRIPT_URL + "?action=getAccounts");
-      let data = await res.json();
-      if (data.accounts) {
-        accounts = data.accounts;
-        accountsLoaded = true;
-      }
-    } catch(e) { 
-        console.error("Failed to load accounts", e);
-    }
-  })();
-
-  function togglePassword() {
-    const input = document.getElementById('password');
-    const icon = document.getElementById('eyeIcon');
-    if (input.type === 'password') {
-      input.type = 'text';
-      icon.innerHTML = '<path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>';
-    } else {
-      input.type = 'password';
-      icon.innerHTML = '<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>';
-    }
-  }
+  const accounts = {
+    "admin":   { password: "password", displayName: "ผู้ปฏิบัติงาน", role: "admin", roleLabel: "หน่วยสื่อสารองค์กร" },
+    "manager": { password: "123", displayName: "หัวหน้าฝ่าย", role: "manager", roleLabel: "ผู้บริหาร" },
+    "viewer":  { password: "abc", displayName: "ผู้เยี่ยมชม", role: "viewer", roleLabel: "ผู้เยี่ยมชม" }
+  };
 
   function handleLogin(e) {
     e.preventDefault();
-    const btn = document.getElementById('loginBtn');
-    const user = document.getElementById('username').value.trim().toLowerCase();
-    const pass = document.getElementById('password').value;
-    const error = document.getElementById('errorMsg');
-    
+    const uname = document.getElementById("uname").value.trim();
+    const psw = document.getElementById("psw").value;
+    const btn = document.getElementById("loginBtn");
+    const error = document.getElementById("errorMsg");
+
     error.classList.remove('show');
     btn.classList.add('loading');
 
-    if (!accountsLoaded) {
-      error.textContent = "กำลังเชื่อมต่อฐานข้อมูล โปรดลองอีกครั้งในสักครู่...";
-      error.classList.add('show');
-      btn.classList.remove('loading');
-      return false;
-    }
-
-    const acc = accounts[user];
-    if (acc && acc.password === pass) {
-        document.getElementById('authSpinner').style.display = 'block';
-        document.getElementById('authCheck').style.display = 'none';
-        document.getElementById('welcomeText').innerHTML = 'กำลังตรวจสอบข้อมูล<br>และเตรียมระบบ...';
-        document.getElementById('roleBadge').style.display = 'none';
-        document.getElementById('goBtn').style.display = 'none';
-        document.getElementById('redirectMsg').style.display = 'none';
-        document.getElementById('successOverlay').classList.add('show');
-
-        setTimeout(() => {
-          const loggedInUser = {
-            username: user,
+    setTimeout(() => {
+      if (accounts[uname] && accounts[uname].password === psw) {
+          const acc = accounts[uname];
+          
+          const sessionData = {
+            username: uname,
             displayName: acc.displayName,
             role: acc.role,
             roleLabel: acc.roleLabel,
             loggedInAt: new Date().toISOString()
           };
-          localStorage.setItem('cc_pr_user', JSON.stringify(loggedInUser));
+          localStorage.setItem('cc_pr_user', JSON.stringify(sessionData));
           localStorage.setItem('cc_pr_lastActivity', Date.now().toString());
 
-          document.getElementById('authSpinner').style.display = 'none';
-          document.getElementById('authCheck').style.display = 'flex';
-          document.getElementById('welcomeText').innerHTML = 'ยินดีต้อนรับ<br><span class="welcome-name">' + acc.displayName + '</span>';
+          document.getElementById('loginForm').style.display = 'none';
+          
+          const successContent = document.getElementById('successContent');
+          successContent.classList.add('show');
+          
+          document.getElementById('displayNameObj').innerHTML = acc.displayName + ' <span style="color:#10b981;">●</span>';
           
           const badge = document.getElementById('roleBadge');
           badge.textContent = acc.roleLabel;
           badge.className = 'role-badge ' + acc.role;
           badge.style.display = 'inline-block';
 
-          document.getElementById('goBtn').style.display = 'inline-block';
           const msg = document.getElementById('redirectMsg');
           msg.style.display = 'block';
           
-          let count = 3;
+          let count = 2;
           msg.textContent = `กำลังพาคุณไปหน้า Dashboard ใน ${count} วินาที...`;
           let timer = setInterval(() => {
             count--;
-            if (count <= 0) { clearInterval(timer); goToDashboard(); }
-            else { msg.textContent = `กำลังพาคุณไปหน้า Dashboard ใน ${count} วินาที...`; }
+            if (count <= 0) {
+              clearInterval(timer);
+              window.location.href = 'dashboard.html';
+            } else {
+              msg.textContent = `กำลังพาคุณไปหน้า Dashboard ใน ${count} วินาที...`;
+            }
           }, 1000);
-        }, 3000);
 
-    } else {
-      error.textContent = "ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง";
-      btn.classList.remove('loading');
-      error.classList.add('show');
-    }
+        } else {
+          error.textContent = "ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง";
+          btn.classList.remove('loading');
+          error.classList.add('show');
+        }
+    }, 800);
     return false;
   }
-
-  function goToDashboard() { window.location.href = 'dashboard.html'; }
 
   (function checkLogin() {
     try {
