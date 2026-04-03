@@ -28,18 +28,32 @@
     }
   } catch(e) {}
 
-  // หากไม่ได้ล็อกอิน ให้ดีดออกทันที!
+ // หากไม่ได้ล็อกอิน ให้ดีดออกทันที!
   if (!allowed) {
     window.__AUTH_BLOCKED__ = true;
     
-    // 1. ซ่อนหน้าเว็บให้กลายเป็นจอขาวล้วนทันที (ไม่ให้เห็นโครงสร้างใดๆ แม้แต่เสี้ยววิ)
-    document.write('<style>html { display: none !important; }</style>');
+    // 1. ทำลายโครงสร้างหน้าเว็บปัจจุบันทิ้งทั้งหมด (ล้างแท็ก <head> และโค้ดเดิมทิ้งเกลี้ยง)
+    document.open();
+    document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Access Denied</title>
+        <style>
+          body { background: #f3f5f9; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: sans-serif; }
+        </style>
+      </head>
+      <body>
+        <h2 style="color: #ef4444;">🔒 Access Denied... กำลังพากลับไปหน้าเข้าสู่ระบบ</h2>
+      </body>
+      </html>
+    `);
+    document.close();
     
-    // 2. ดีดกลับไปหน้าเข้าสู่ระบบ (ใช้ replace เพื่อทำลายประวัติการเข้าชม ทำให้ผู้ใช้กดปุ่มย้อนกลับ/Back ไม่ได้)
+    // 2. ดีดกลับไปหน้าเข้าสู่ระบบ (ระบบจะวิ่งไปทันที โดยที่ไม่มีโค้ดรายงานเหลือให้ดูแล้ว)
     window.location.replace("../../index.html");
     
-    // 3. บังคับเบราว์เซอร์หยุดอ่านโค้ด
-    window.stop();
+    // จบการทำงานฟังก์ชัน (ไม่ต้องมี window.stop() แล้วครับ)
     return;
   }
 
