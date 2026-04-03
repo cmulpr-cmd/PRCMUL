@@ -52,6 +52,20 @@ method: 'GET', mode: 'no-cors'
 <title>PR DASHBOARD-LOGIN</title>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
 <style>
+            /* --- เอฟเฟคใหม่ที่เพิ่มเข้ามา --- */
+.fade-in-up {
+    animation: fadeInUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes fadeInUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(15px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
 :root {
 --bg: #f0f4ff;
 --surface: #ffffff;
@@ -346,48 +360,108 @@ return false;
 
 const acc = accounts[user];
 if (acc && acc.password === pass) {
-document.getElementById('authSpinner').style.display = 'block';
-document.getElementById('authCheck').style.display = 'none';
-document.getElementById('profileImg').style.display = 'none'; // ซ่อนรูปภาพระหว่างโหลด
-document.getElementById('welcomeText').innerHTML = 'กำลังตรวจสอบข้อมูล<br>และเตรียมระบบ...';
-document.getElementById('roleBadge').style.display = 'none';
-document.getElementById('goBtn').style.display = 'none';
-document.getElementById('redirectMsg').style.display = 'none';
-document.getElementById('successOverlay').classList.add('show');
+    // 1. ซ่อนและรีเซ็ตทุกอย่างก่อนเริ่ม Sequence
+    document.getElementById('authSpinner').style.display = 'block';
+    document.getElementById('authCheck').style.display = 'none';
+    document.getElementById('profileImg').style.display = 'none'; 
+    
+    const welcomeText = document.getElementById('welcomeText');
+    welcomeText.innerHTML = 'กำลังตรวจสอบข้อมูล<br>และเตรียมระบบ...';
+    welcomeText.classList.remove('fade-in-up'); // รีเซ็ตคลาส
+    
+    const badge = document.getElementById('roleBadge');
+    badge.style.display = 'none';
+    badge.classList.remove('fade-in-up');
 
-setTimeout(() => {
-const loggedInUser = {
-username: user,
-displayName: acc.displayName,
-role: acc.role,
-roleLabel: acc.roleLabel,
-loggedInAt: new Date().toISOString()
-};
-localStorage.setItem('cc_pr_user', JSON.stringify(loggedInUser));
-localStorage.setItem('cc_pr_lastActivity', Date.now().toString());
+    const goBtn = document.getElementById('goBtn');
+    goBtn.style.display = 'none';
+    goBtn.classList.remove('fade-in-up');
 
-document.getElementById('authSpinner').style.display = 'none';
+    const msg = document.getElementById('redirectMsg');
+    msg.style.display = 'none';
+    msg.classList.remove('fade-in-up');
 
-// --- ส่วนจัดการการแสดงผลรูปโปรไฟล์ ---
-const userImages = {
+    // แสดง Overlay พื้นหลัง
+    document.getElementById('successOverlay').classList.add('show');
+
+    // ==========================================
+    // เริ่ม TIMELINE การแสดงผล
+    // ==========================================
+
+    // สเตป 1: หมุนตรวจสอบ 1.5 วินาที
+    setTimeout(() => {
+        // บันทึกข้อมูลลง LocalStorage
+        const loggedInUser = {
+            username: user,
+            displayName: acc.displayName,
+            role: acc.role,
+            roleLabel: acc.roleLabel,
+            loggedInAt: new Date().toISOString()
+        };
+        localStorage.setItem('cc_pr_user', JSON.stringify(loggedInUser));
+        localStorage.setItem('cc_pr_lastActivity', Date.now().toString());
+
+        // ปิด Spinner
+        document.getElementById('authSpinner').style.display = 'none';
+
+        // จัดการรูปโปรไฟล์
+        const userImages = {
             'thanapun.k': 'profile/thanapun.jpg',
             'apinanun.s': 'profile/apinanun.jpg',
             'thian': 'profile/thianrawich.png',
             'chamaiporn.k': 'profile/chamaiporn.jpg'
-};
+        };
 
-const profileImg = document.getElementById('profileImg');
-const authCheck = document.getElementById('authCheck');
+        const profileImg = document.getElementById('profileImg');
+        const authCheck = document.getElementById('authCheck');
 
-if (userImages[user]) {
-profileImg.src = userImages[user];
-profileImg.style.display = 'block';
-authCheck.style.display = 'none';
+        // ทำให้รูปเด้งขึ้นมา
+        if (userImages[user]) {
+            profileImg.src = userImages[user];
+            profileImg.style.display = 'block';
+            authCheck.style.display = 'none';
+        } else {
+            profileImg.style.display = 'none';
+            authCheck.style.display = 'flex';
+        }
+
+        // เปลี่ยนข้อความต้อนรับ และใส่เอฟเฟค Fade In Up
+        welcomeText.innerHTML = 'ยินดีต้อนรับ<br><span class="welcome-name">' + acc.displayName + '</span>';
+        welcomeText.classList.add('fade-in-up');
+
+        // สเตป 2: ดีเลย์ 0.3 วินาที ให้ป้ายสถานะโผล่ตามมา
+        setTimeout(() => {
+            badge.textContent = acc.roleLabel;
+            badge.className = 'role-badge ' + acc.role + ' fade-in-up';
+            badge.style.display = 'inline-block';
+        }, 300);
+
+        // สเตป 3: ดีเลย์ 0.6 วินาที ให้ปุ่มโผล่มาและเริ่มนับถอยหลัง
+        setTimeout(() => {
+            goBtn.style.display = 'inline-block';
+            goBtn.classList.add('fade-in-up');
+            
+            msg.style.display = 'block';
+            msg.classList.add('fade-in-up');
+
+            let count = 3;
+            msg.textContent = `กำลังพาคุณไปหน้า Dashboard ใน ${count} วินาที...`;
+            let timer = setInterval(() => {
+                count--;
+                if (count <= 0) { 
+                    clearInterval(timer); 
+                    goToDashboard(); 
+                }
+                else { 
+                    msg.textContent = `กำลังพาคุณไปหน้า Dashboard ใน ${count} วินาที...`; 
+                }
+            }, 1000);
+        }, 600);
+
+    }, 1500); // ระยะเวลาหมุนตรวจสอบ 1.5 วินาที
+
 } else {
-profileImg.style.display = 'none';
-authCheck.style.display = 'flex';
-}
-// ----------------------------------------
+    // กรณีรหัสผิด... (คงโค้ดเดิมไว้)// ----------------------------------------
 
 document.getElementById('welcomeText').innerHTML = 'ยินดีต้อนรับ<br><span class="welcome-name">' + acc.displayName + '</span>';
 
