@@ -341,128 +341,7 @@ icon.innerHTML = '<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9
 }
 }
 
-function handleLogin(e) {
-e.preventDefault();
-const btn = document.getElementById('loginBtn');
-const user = document.getElementById('username').value.trim().toLowerCase();
-const pass = document.getElementById('password').value;
-const error = document.getElementById('errorMsg');
-
-error.classList.remove('show');
-btn.classList.add('loading');
-
-if (!accountsLoaded) {
-error.textContent = "กำลังเชื่อมต่อฐานข้อมูล โปรดลองอีกครั้งในสักครู่...";
-error.classList.add('show');
-btn.classList.remove('loading');
-return false;
-}
-
-const acc = accounts[user];
-if (acc && acc.password === pass) {
-    // 1. ซ่อนและรีเซ็ตทุกอย่างก่อนเริ่ม Sequence
-    document.getElementById('authSpinner').style.display = 'block';
-    document.getElementById('authCheck').style.display = 'none';
-    document.getElementById('profileImg').style.display = 'none'; 
-    
-    const welcomeText = document.getElementById('welcomeText');
-    welcomeText.innerHTML = 'กำลังตรวจสอบข้อมูล<br>และเตรียมระบบ...';
-    welcomeText.classList.remove('fade-in-up'); // รีเซ็ตคลาส
-    
-    const badge = document.getElementById('roleBadge');
-    badge.style.display = 'none';
-    badge.classList.remove('fade-in-up');
-
-    const goBtn = document.getElementById('goBtn');
-    goBtn.style.display = 'none';
-    goBtn.classList.remove('fade-in-up');
-
-    const msg = document.getElementById('redirectMsg');
-    msg.style.display = 'none';
-    msg.classList.remove('fade-in-up');
-
-    // แสดง Overlay พื้นหลัง
-    document.getElementById('successOverlay').classList.add('show');
-
-    // ==========================================
-    // เริ่ม TIMELINE การแสดงผล
-    // ==========================================
-
-    // สเตป 1: หมุนตรวจสอบ 1.5 วินาที
-    setTimeout(() => {
-        // บันทึกข้อมูลลง LocalStorage
-        const loggedInUser = {
-            username: user,
-            displayName: acc.displayName,
-            role: acc.role,
-            roleLabel: acc.roleLabel,
-            loggedInAt: new Date().toISOString()
-        };
-        localStorage.setItem('cc_pr_user', JSON.stringify(loggedInUser));
-        localStorage.setItem('cc_pr_lastActivity', Date.now().toString());
-
-        // ปิด Spinner
-        document.getElementById('authSpinner').style.display = 'none';
-
-        // จัดการรูปโปรไฟล์
-        const userImages = {
-            'thanapun.k': 'profile/thanapun.jpg',
-            'apinanun.s': 'profile/apinanun.jpg',
-            'thian': 'profile/thianrawich.png',
-            'chamaiporn.k': 'profile/chamaiporn.jpg'
-        };
-
-        const profileImg = document.getElementById('profileImg');
-        const authCheck = document.getElementById('authCheck');
-
-        // ทำให้รูปเด้งขึ้นมา
-        if (userImages[user]) {
-            profileImg.src = userImages[user];
-            profileImg.style.display = 'block';
-            authCheck.style.display = 'none';
-        } else {
-            profileImg.style.display = 'none';
-            authCheck.style.display = 'flex';
-        }
-
-        // เปลี่ยนข้อความต้อนรับ และใส่เอฟเฟค Fade In Up
-        welcomeText.innerHTML = 'ยินดีต้อนรับ<br><span class="welcome-name">' + acc.displayName + '</span>';
-        welcomeText.classList.add('fade-in-up');
-
-        // สเตป 2: ดีเลย์ 0.3 วินาที ให้ป้ายสถานะโผล่ตามมา
-        setTimeout(() => {
-            badge.textContent = acc.roleLabel;
-            badge.className = 'role-badge ' + acc.role + ' fade-in-up';
-            badge.style.display = 'inline-block';
-        }, 300);
-
-        // สเตป 3: ดีเลย์ 0.6 วินาที ให้ปุ่มโผล่มาและเริ่มนับถอยหลัง
-        setTimeout(() => {
-            goBtn.style.display = 'inline-block';
-            goBtn.classList.add('fade-in-up');
-            
-            msg.style.display = 'block';
-            msg.classList.add('fade-in-up');
-
-            let count = 3;
-            msg.textContent = `กำลังพาคุณไปหน้า Dashboard ใน ${count} วินาที...`;
-            let timer = setInterval(() => {
-                count--;
-                if (count <= 0) { 
-                    clearInterval(timer); 
-                    goToDashboard(); 
-                }
-                else { 
-                    msg.textContent = `กำลังพาคุณไปหน้า Dashboard ใน ${count} วินาที...`; 
-                }
-            }, 1000);
-        }, 600);
-
-    }, 1500); // ระยะเวลาหมุนตรวจสอบ 1.5 วินาที
-
-} else {
-    // กรณีรหัสผิด... (คงโค้ดเดิมไว้)// ----------------------------------------
-
+function handleLogin(e)
 document.getElementById('welcomeText').innerHTML = 'ยินดีต้อนรับ<br><span class="welcome-name">' + acc.displayName + '</span>';
 
 const badge = document.getElementById('roleBadge');
@@ -475,11 +354,11 @@ const msg = document.getElementById('redirectMsg');
 msg.style.display = 'block';
 
 let count = 3;
-msg.textContent = `กำลังพาคุณไปหน้า Dashboard ใน ${count} วินาที...`;
+msg.textContent = `กำลังพาท่านไปหน้า Dashboard ใน ${count} วินาที...`;
 let timer = setInterval(() => {
 count--;
 if (count <= 0) { clearInterval(timer); goToDashboard(); }
-else { msg.textContent = `กำลังพาคุณไปหน้า Dashboard ใน ${count} วินาที...`; }
+else { msg.textContent = `กำลังพาท่านไปหน้า Dashboard ใน ${count} วินาที...`; }
 }, 1000);
 }, 3000);
 
