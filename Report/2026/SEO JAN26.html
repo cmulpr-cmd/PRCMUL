@@ -28,28 +28,29 @@
     }
   } catch(e) {}
 
-  // หากไม่ได้ล็อกอิน ให้เคลียร์หน้าจอและแสดงหน้า Access Denied ทันที
 // หากไม่ได้ล็อกอิน ให้เขียนทับทั้งหน้าจอทันที
   if (!allowed) {
     window.__AUTH_BLOCKED__ = true;
     
-    // 1. สั่งล้างแท็ก <head> เดิมทิ้งทั้งหมด (ลบสคริปต์และ CSS ที่คนจะแอบดูออกให้เกลี้ยง)
-    document.head.innerHTML = `
-      <title>Access Denied</title>
-      <meta charset="UTF-8">
-    `;
+    // 1. คำสั่งเวทมนตร์: บังคับเบราว์เซอร์ให้ "หยุดดาวน์โหลดและหยุดอ่านโค้ดส่วนที่เหลือ" ทันที!
+    window.stop();
 
-    // 2. สั่งล้าง <body> แล้วเขียนหน้า Access Denied ทับลงไป
-    document.body.innerHTML = `
-      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f3f5f9;font-family:'Noto Sans Thai',sans-serif; margin:0;">
+    // 2. เขียนทับโครงสร้างตั้งแต่แท็ก <html> ลงมาทั้งหมด (ลบ head และตัวแปรอื่นๆ ทิ้งเกลี้ยง)
+    document.documentElement.innerHTML = `
+      <head>
+        <title>Access Denied</title>
+        <meta charset="UTF-8">
+      </head>
+      <body style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f3f5f9;font-family:'Noto Sans Thai',sans-serif; margin:0;">
         <div style="background:#fff;border-radius:24px;padding:48px 40px;text-align:center;max-width:440px;width:90%;box-shadow:0 25px 60px rgba(0,0,0,0.05); border-top: 5px solid #ef4444;">
           <div style="font-size: 48px; margin-bottom: 12px;">🔒</div>
           <h1 style="font-size:28px;font-weight:900;margin-bottom:12px;color:#ef4444;">Access Denied</h1>
           <p style="color:#475569;font-size:15px;line-height:1.6;margin-bottom:28px;font-weight:500;">หากท่านเป็นผู้ปฏิบัติงาน "หน่วยสื่อสารองค์กร"<br>กรุณาเข้าสู่ระบบก่อนใช้งาน</p>
           <a href="../../index.html" style="display:inline-block;padding:12px 36px;border-radius:12px;background:#2563eb;color:#fff;text-decoration:none;font-weight:700;font-size:15px;">กลับไปหน้าเข้าสู่ระบบ</a>
         </div>
-      </div>
+      </body>
     `;
+  }
     
     // 3. คำสั่งเวทมนตร์: บังคับเบราว์เซอร์ให้ "หยุดดาวน์โหลดและหยุดอ่านโค้ดส่วนที่เหลือ" ทันที
     window.stop();
